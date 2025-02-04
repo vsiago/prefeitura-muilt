@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      const response = await fetch("http://prefeitura-muilt-back.vercel.app/api/users/login", {
+      const response = await fetch("https://prefeitura-muilt-back.vercel.app/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data, password }),
