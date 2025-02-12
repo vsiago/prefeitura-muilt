@@ -8,7 +8,6 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen flex flex-col bg-bg60">
-      {user?.role === "master" ? (
         <>
           <header className="bg-primary10 px-5 w-full">
             <div className="flex items-center justify-between h-16 sm:max-w-96 md:h-20 max-w-96 mx-auto md:w-full">

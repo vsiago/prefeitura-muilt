@@ -25,7 +25,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     }, [isAuthenticated, isLoading, user, pathname, router]);
 
     if (isLoading) {
-        return <p className="text-center text-lg">Carregando...</p>;
+        return (
+            ""
+        );
     }
 
     return isAuthenticated ? children : null;

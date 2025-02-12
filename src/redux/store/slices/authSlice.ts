@@ -1,21 +1,39 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
-interface AuthState {
-  user: { id: string; role: "master" | "user" | "member" | "tecnico" } | null;
+export interface App {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  status: string;
+  updatedAt: string;
+  url: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  role: "master" | "user" | "member" | "tecnico";
+  apps: App[];
+}
+
+export interface AuthState {
+  user: User | null;
   token: string | null;
 }
 
+
 const initialState: AuthState = {
-  user: null,
-  token: null,
+  user: typeof window !== "undefined" ? JSON.parse(localStorage.getItem("user") || "null") : null,
+  token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    loginSuccess: (state, action: PayloadAction<{ user: AuthState["user"]; token: string }>) => {
+    loginSuccess: (state, action: PayloadAction<{ user: User; token: string }>) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
       if (typeof window !== "undefined") {
@@ -31,9 +49,17 @@ const authSlice = createSlice({
         localStorage.removeItem("user");
       }
     },
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(state.user));
+        }
+      }
+    },
   },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout, updateUser } = authSlice.actions;
 export const selectUser = (state: RootState) => state.auth.user;
 export default authSlice.reducer;
