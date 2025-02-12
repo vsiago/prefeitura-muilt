@@ -5,32 +5,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { User, Eye, EyeOff, Loader2 } from "lucide-react";
-import { useState, useContext } from "react";
-import { AuthContext } from "@/context/UserContext";
+import { useState } from "react";
 import { Toaster, toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "@/redux/store/slices/authSlice";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const auth = useContext(AuthContext);
 
-  if (!auth) return null; // Verificação de segurança
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      await auth.login(username, password);
+      const response = await fetch("http://localhost:3333/api/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ data: username, password }),
+      });
+
+      if (!response.ok) throw new Error("Credenciais inválidas!");
+
+      const { user, token } = await response.json();
+      dispatch(loginSuccess({ user, token }));
+
+      document.cookie = `token=${token}; path=/;`;
+
       toast.success("Login realizado com sucesso!");
-      setTimeout(() => {
-        // router.push("/dashboard");
-      }, 2000); // Tempo de espera antes de redirecionar
+      router.push(user.role === "master" || user.role === "tecnico" ? "/dashboard" : "/home");
     } catch (error) {
-      toast.error("Erro ao fazer login. Verifique suas credenciais.");
+      toast.error(error.message);
     } finally {
-      setTimeout(() => setLoading(false), 1500); // Delay para melhorar UX
+      setLoading(false);
     }
   };
 
@@ -60,6 +76,7 @@ export default function Login() {
                   className="pl-5"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  required
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
                   <User className="w-5 h-5" />
@@ -75,6 +92,7 @@ export default function Login() {
                   className="pr-5 pl-5"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   type="button"
