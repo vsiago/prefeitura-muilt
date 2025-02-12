@@ -14,7 +14,7 @@ export interface App {
 export interface User {
   id: string;
   name: string;
-  role: "master" | "user" | "member" | "tecnico";
+  role: "Master" | "Cidadão" | "Membro" | "Técnico";
   apps: App[];
 }
 

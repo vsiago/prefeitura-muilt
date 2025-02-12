@@ -17,9 +17,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
         if (!isAuthenticated) {
             router.replace("/login");
-        } else if (isDashboard && !["master", "tecnico"].includes(user?.role || "")) {
+        } else if (isDashboard && !["Master", "Técnico"].includes(user?.role || "")) {
             router.replace("/home");
-        } else if (isHome && !["user", "member"].includes(user?.role || "")) {
+        } else if (isHome && !["Cidadão", "Membro"].includes(user?.role || "")) {
             router.replace("/dashboard");
         }
     }, [isAuthenticated, isLoading, user, pathname, router]);

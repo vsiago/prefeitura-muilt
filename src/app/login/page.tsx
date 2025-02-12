@@ -59,21 +59,19 @@ export default function Login() {
       dispatch(loginSuccess({ user, token }));
 
       document.cookie = `token=${token}; path=/;`;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-      // Exibe o toast
       toast.success("Login realizado com sucesso!");
 
-      // Aguarda 1 segundo para exibir a splash
+      // Aguarde a atualização do estado antes de redirecionar
       setTimeout(() => {
         setShowSplash(true);
 
-        // Aguarda 4 segundos antes de redirecionar
         setTimeout(() => {
-          router.push(
-            user.role === "master" || user.role === "tecnico"
-              ? "/dashboard"
-              : "/home"
-          );
+          if (user && user.role) {
+            router.replace(user.role === "Master" || user.role === "Técnico" ? "/dashboard" : "/home");
+          }
           setLoading(false);
         }, 3000);
       }, 1000);
@@ -82,6 +80,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+
 
   // Se a splash estiver ativa, exibe a tela de splash
   if (showSplash) {
