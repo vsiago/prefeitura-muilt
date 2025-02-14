@@ -9,12 +9,13 @@ export interface App {
   status: string;
   updatedAt: string;
   url: string;
+  category: string; // Adicionado para evitar erros ao acessar app.category
 }
 
 export interface User {
   id: string;
   name: string;
-  role: "Master" | "Cidadão" | "Servidor" | "Técnico";
+  role: "Master" | "Cidadão" | "Servidor" | "Técnico" | "Servidor";
   apps: App[];
 }
 
