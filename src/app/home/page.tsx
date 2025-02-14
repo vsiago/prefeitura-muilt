@@ -20,39 +20,6 @@ export default function Home() {
 
     return (
         <ProtectedRoute>
-            <header className="bg-primary10 px-5 w-full">
-                <div className="flex items-center justify-between h-16 container mx-auto">
-                    <h1 className="text-white text-xl font-bold">ItaSuit</h1>
-                    <div className="flex items-center gap-2">
-                        <div className="text-end">
-                            <p className="text-white font-bold text-[.8rem]">{user?.name}</p>
-                            <p className="text-sky-200 text-[.8rem]">{user?.role}</p>
-                        </div>
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <button>
-                                    <Avatar>
-                                        <AvatarImage src="https://avatars.githubusercontent.com/u/101620032?v=4" />
-                                        <AvatarFallback>CN</AvatarFallback>
-                                    </Avatar>
-                                </button>
-                            </SheetTrigger>
-                            <SheetContent className="bg-sky-500 text-white w-full">
-                                <SheetHeader>
-                                    <SheetTitle className="text-white">Perfil</SheetTitle>
-                                    <SheetDescription className="text-white">
-                                        Informações do usuário
-                                    </SheetDescription>
-                                </SheetHeader>
-                                <div className="mt-4">
-                                    <p><strong>Nome:</strong> {user?.name}</p>
-                                    <p><strong>Cargo:</strong> {user?.role}</p>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
-                    </div>
-                </div>
-            </header>
             <main className="py-5 min-h-screen bg-[#E2E4EE]">
                 <div className="grid p-5 md:p-0 grid-cols-2 sm:grid-cols-4 gap-3 container mx-auto">
                     {user?.apps?.length ? (

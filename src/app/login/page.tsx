@@ -70,7 +70,7 @@ export default function Login() {
 
         setTimeout(() => {
           if (user && user.role) {
-            router.replace(user.role === "Master" || user.role === "Técnico" ? "/dashboard" : "/home");
+            router.replace(user.role === "Master" || user.role === "Técnico" ? "/dashboard/apps" : "/home");
           }
           setLoading(false);
         }, 3000);
@@ -103,7 +103,7 @@ export default function Login() {
   return (
     <main className="min-h-screen bg-bg60 flex items-center justify-center">
       <Toaster />
-      <Card className="w-full sm:max-w-[60%] md:max-w-[50%] lg:max-w-[30%]  border-2 border-white py-10">
+      <Card className="w-full sm:max-w-[60%] md:max-w-[50%] lg:max-w-[30%] bg-white/50  border-2 border-white py-10">
         <CardHeader className="text-center">
           <Image
             width={150}

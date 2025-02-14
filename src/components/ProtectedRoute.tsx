@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     const router = useRouter();
     const pathname = usePathname();
 
-    const isDashboard = pathname.startsWith("/dashboard");
+    const isDashboard = pathname.startsWith("/dashboard/apps");
     const isHome = pathname.startsWith("/home");
 
     useEffect(() => {
@@ -17,10 +17,10 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
         if (!isAuthenticated) {
             router.replace("/login");
-        } else if (isDashboard && !["Master", "Técnico"].includes(user?.role || "")) {
+        } else if (isDashboard && !["Master", "Técnico",].includes(user?.role || "")) {
             router.replace("/home");
-        } else if (isHome && !["Cidadão", "Membro"].includes(user?.role || "")) {
-            router.replace("/dashboard");
+        } else if (isHome && !["Cidadão", "Servidor"].includes(user?.role || "")) {
+            router.replace("/dashboard/apps");
         }
     }, [isAuthenticated, isLoading, user, pathname, router]);
 
