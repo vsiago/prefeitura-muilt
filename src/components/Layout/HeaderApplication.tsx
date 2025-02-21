@@ -12,8 +12,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from 'next/image';
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
-export default function HeaderDashboard() {
+export default function HeaderHomeApplication() {
     const userFromRedux = useSelector(selectUser);
     const [user, setUser] = useState<User | null>(null);
 
@@ -32,17 +33,39 @@ export default function HeaderDashboard() {
         return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
     }
 
+    function formatName(name: string) {
+        if (!name) return "Nome Completo";
+
+        const ignoreWords = ["da", "do", "das", "dos"];
+
+        // Divide o nome em palavras, removendo espaços extras
+        let words = name
+            .trim()
+            .split(/\s+/) // Divide corretamente os espaços múltiplos
+            .filter(word => !ignoreWords.includes(word.toLowerCase())) // Remove 'da', 'do', etc.
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()); // Ajusta maiúsculas e minúsculas
+
+        if (words.length > 2) {
+            // Mantém o primeiro e último nome completos e reduz os intermediários para a inicial + "."
+            return `${words[0]} ${words.slice(1, -1).map(w => w.charAt(0) + ".").join(" ")} ${words[words.length - 1]}`;
+        }
+
+        return words.join(" ");
+    }
 
     return (
-        <header className="bg-primary10 w-full lg:pl-44 xl:pl-72 px-6 relative z-10">
+        <header className="bg-[#E2E4EE] w-full px-6 z-10 fixed drop-shadow-2xl shadow-xl">
             <div className="flex items-center justify-between h-20 container mx-auto">
-                <div className='w-32 md:w-44 h-full flex items-center justify-center'>
-                    <Image width={200} height={100} alt='logo da prefeitura' src={"/logo-prefeitura-horizontal.svg"} className='object-contain' />
-                </div>
+                <Link href={"/home"} className='w-32 md:w-44 h-full flex items-center justify-center'>
+                    <p className="text-primary30 text-xl font-bold">Iníco</p>
+                </Link>
+                <Link href={"/bic"} className='w-32 md:w-44 h-full flex items-center justify-center'>
+                    <p className="text-primary30 text-xl font-bold">BIC</p>
+                </Link>
                 <div className="flex items-center gap-2">
                     <div className="text-end">
-                        <p className="text-white font-bold text-base leading-5">{user.name}</p>
-                        <p className="text-sky-200 text-xs md:text-base leading-5">{user.role}</p>
+                        <p className="font-bold text-lg leading-5 text-[#375582]">{formatName(user.name)}</p>
+                        <p className="text-xs md:text-base leading-5 text-[#0266AF]">{user.role}</p>
                     </div>
                     <Sheet>
                         <SheetTrigger asChild>

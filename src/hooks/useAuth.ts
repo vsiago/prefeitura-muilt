@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectUser, loginSuccess } from "@/redux/store/slices/authSlice";
-import type { User } from "@/redux/store/slices/authSlice";
+import { selectUser, loginSuccess } from "@/redux/slices/authSlice";
+import type { User } from "@/redux/slices/authSlice";
 import axios from "axios";
 
 export function useAuth() {

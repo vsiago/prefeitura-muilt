@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
             router.replace("/login");
         } else if (isDashboard && !["Master", "Técnico",].includes(user?.role || "")) {
             router.replace("/home");
-        } else if (isHome && !["Cidadão", "Servidor"].includes(user?.role || "")) {
+        } else if (isHome && !["Cidadão", "Servidor", "Coordenador"].includes(user?.role || "")) {
             router.replace("/dashboard/apps");
         }
     }, [isAuthenticated, isLoading, user, pathname, router]);

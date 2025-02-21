@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
 export interface App {
+  map(arg0: (app: any) => import("react").JSX.Element): import("react").ReactNode;
   id: string;
   name: string;
   icon: string;

@@ -1,3 +1,4 @@
+// app/layout.tsx
 import ReduxProvider from "@/redux/providers/ReduxProvider";
 import "./globals.css";
 

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { selectUser } from "@/redux/store/slices/authSlice";
+import { selectUser } from "@/redux/slices/authSlice";
 
 
 import {

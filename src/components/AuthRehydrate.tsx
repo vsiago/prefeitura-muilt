@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { loginSuccess } from "@/redux/store/slices/authSlice";
+import { loginSuccess } from "@/redux/slices/authSlice";
 
 export default function AuthRehydrate() {
     const dispatch = useDispatch();

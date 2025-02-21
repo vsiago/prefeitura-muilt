@@ -8,7 +8,7 @@ import { User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
 import { useDispatch } from "react-redux";
-import { loginSuccess } from "@/redux/store/slices/authSlice";
+import { loginSuccess } from "@/redux/slices/authSlice";
 import { useRouter } from "next/navigation";
 import { Progress } from "@/components/ui/progress"; // Importando a barra de progresso do ShadCN
 
