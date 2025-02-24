@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import axios from "axios";
 
 export default function Bic() {
     const router = useRouter();
     const { user, isLoading } = useAuth();
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedActions, setSelectedActions] = useState({});
+    const [updatedUsers, setUpdatedUsers] = useState({});
 
     useEffect(() => {
         if (!isLoading) {
@@ -35,20 +37,33 @@ export default function Bic() {
 
     const promoteUser = async (username) => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("Token não encontrado");
-            return;
-        }
         try {
-            await axios.post("http://localhost:3333/api/apps/instal-tecnico", {
-                username,
-                apps: ["BIC"]
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            alert(`Usuário ${username} promovido com sucesso!`);
+            await axios.post(
+                "http://localhost:3333/api/apps/instal-tecnico",
+                { username, apps: ["BIC"] },
+                { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+            );
+            alert("Usuário promovido com sucesso!");
+            setUpdatedUsers((prev) => ({ ...prev, [username]: true }));
+            setSelectedActions((prev) => ({ ...prev, [username]: "promoted" }));
         } catch (error) {
             console.error("Erro ao promover usuário", error);
+        }
+    };
+
+    const demoteUser = async (username) => {
+        const token = localStorage.getItem("token");
+        try {
+            await axios.post(
+                "http://localhost:3333/api/apps/uninstall",
+                { username, apps: ["BIC"] },
+                { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+            );
+            alert("Usuário rebaixado para Servidor!");
+            setUpdatedUsers((prev) => ({ ...prev, [username]: false }));
+            setSelectedActions((prev) => ({ ...prev, [username]: "" }));
+        } catch (error) {
+            console.error("Erro ao rebaixar usuário", error);
         }
     };
 
@@ -80,7 +95,9 @@ export default function Bic() {
                         <TabsContent key={groupName} value={groupName} className="w-full">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {filteredUsers(user.usersByGroup[groupName]).map((user) => {
-                                    const isPromoted = user.specificApplications?.includes("BIC");
+                                    const isPromoted = updatedUsers[user.username] ?? user.specificApplications?.includes("BIC");
+                                    const selectedAction = selectedActions[user.username] ?? (isPromoted ? "promoted" : "");
+
                                     return (
                                         <div
                                             key={user.username}
@@ -94,12 +111,17 @@ export default function Bic() {
                                                 <p className="text-sm text-gray-500">@{user.username}</p>
                                                 <p className="text-sm text-gray-500">{user.email}</p>
                                             </div>
-                                            <Select onValueChange={() => promoteUser(user.username)} defaultValue={isPromoted ? "promovido" : ""}>
-                                                <SelectTrigger className="w-48">
-                                                    <span>{isPromoted ? "Promovido como Técnico" : "Ação"}</span>
+                                            <Select onValueChange={(value) => {
+                                                if (value === "promote") promoteUser(user.username);
+                                                else if (value === "demote") demoteUser(user.username);
+                                            }} value={selectedAction}>
+                                                <SelectTrigger className="w-56">
+                                                    <SelectValue placeholder="Ação" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="promover">Promover para Técnico</SelectItem>
+                                                    {!isPromoted && <SelectItem value="promote">Promover para Técnico</SelectItem>}
+                                                    {isPromoted && <SelectItem value="demote">Rebaixar para Servidor</SelectItem>}
+                                                    {isPromoted && <SelectItem value="promoted">Promovido como Técnico</SelectItem>}
                                                 </SelectContent>
                                             </Select>
                                         </div>
