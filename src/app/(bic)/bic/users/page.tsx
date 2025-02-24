@@ -94,39 +94,46 @@ export default function Bic() {
                     {groupNames.map((groupName) => (
                         <TabsContent key={groupName} value={groupName} className="w-full">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {filteredUsers(user.usersByGroup[groupName]).map((user) => {
-                                    const isPromoted = updatedUsers[user.username] ?? user.specificApplications?.includes("BIC");
-                                    const selectedAction = selectedActions[user.username] ?? (isPromoted ? "promoted" : "");
+                                {filteredUsers(user.usersByGroup[groupName])
+                                    .filter(({ username }) => username !== user.username) // Remove o usuário logado
+                                    .map((user) => {
+                                        const isPromoted = updatedUsers[user.username] ?? user.specificApplications?.includes("BIC");
+                                        const selectedAction = selectedActions[user.username] ?? (isPromoted ? "promoted" : "");
 
-                                    return (
-                                        <div
-                                            key={user.username}
-                                            className={`flex items-center p-4 rounded-lg shadow-sm transition cursor-pointer ${isPromoted ? "bg-green-100" : "bg-gray-50 hover:bg-gray-100"}`}
-                                        >
-                                            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 text-white font-semibold text-lg mr-4">
-                                                {user.fullName.split(" ").map(n => n[0]).join("")}
+                                        return (
+                                            <div
+                                                key={user.username}
+                                                className={`flex items-center p-4 rounded-lg shadow-sm transition cursor-pointer ${isPromoted ? "bg-green-100" : "bg-gray-50 hover:bg-gray-100"
+                                                    }`}
+                                            >
+                                                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 text-white font-semibold text-lg mr-4">
+                                                    {user.fullName.split(" ").map((n) => n[0]).join("")}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-medium text-gray-800">{user.fullName}</p>
+                                                    <p className="text-sm text-gray-500">@{user.username}</p>
+                                                    <p className="text-sm text-gray-500">{user.email}</p>
+                                                </div>
+                                                <Select
+                                                    onValueChange={(value) => {
+                                                        if (value === "promote") promoteUser(user.username);
+                                                        else if (value === "demote") demoteUser(user.username);
+                                                    }}
+                                                    value={selectedAction}
+                                                >
+                                                    <SelectTrigger className="w-56">
+                                                        <SelectValue placeholder="Ação" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {!isPromoted && <SelectItem value="promote">Promover para Técnico</SelectItem>}
+                                                        {isPromoted && <SelectItem value="demote">Rebaixar para Servidor</SelectItem>}
+                                                        {isPromoted && <SelectItem value="promoted">Promovido como Técnico</SelectItem>}
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
-                                            <div className="flex-1">
-                                                <p className="font-medium text-gray-800">{user.fullName}</p>
-                                                <p className="text-sm text-gray-500">@{user.username}</p>
-                                                <p className="text-sm text-gray-500">{user.email}</p>
-                                            </div>
-                                            <Select onValueChange={(value) => {
-                                                if (value === "promote") promoteUser(user.username);
-                                                else if (value === "demote") demoteUser(user.username);
-                                            }} value={selectedAction}>
-                                                <SelectTrigger className="w-56">
-                                                    <SelectValue placeholder="Ação" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {!isPromoted && <SelectItem value="promote">Promover para Técnico</SelectItem>}
-                                                    {isPromoted && <SelectItem value="demote">Rebaixar para Servidor</SelectItem>}
-                                                    {isPromoted && <SelectItem value="promoted">Promovido como Técnico</SelectItem>}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+
                             </div>
                         </TabsContent>
                     ))}
