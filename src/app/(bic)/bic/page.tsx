@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import HeaderApplication from "@/components/Layout/HeaderApplication";
 import DashboardBicPage from "./DashboardBicPage";
+import AsideHome from "@/components/Layout/AsideHome";
 
 export default function Bic() {
     const router = useRouter();
@@ -28,8 +29,8 @@ export default function Bic() {
 
     return (
         <>
-            <HeaderApplication />
-            <main className="bg-sky-50 min-h-screen flex flex-col items-center justify-start pt-40">
+
+            <main className=" min-h-screen flex flex-col items-center justify-start pt-40">
                 <DashboardBicPage />
             </main>
         </>

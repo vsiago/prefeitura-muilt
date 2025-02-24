@@ -4,16 +4,24 @@ import { useSelector, useDispatch } from "react-redux"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
-import type { RootState } from "./store/store"
-import { deleteCadastre, setCurrentCadastre } from "./store/cadastreSlice"
-import type { Cadastre } from "./store/cadastreSlice"
+import type { RootState } from "@/redux/store"
+import { deleteCadastre, setCurrentCadastre } from "@/redux/slices/cadastresSlice"
+import type { Cadastre } from "@/redux/slices/cadastresSlice"
+import { useCadastres } from "@/hooks/useCadastres"
+import { useEffect } from "react"
 
 interface CadastreListProps {
   onEdit: (cadastre: Cadastre) => void
 }
 
 export function CadastreList({ onEdit }: CadastreListProps) {
-  const cadastres = useSelector((state: RootState) => state.bic.cadastres)
+  const { cadastres } = useCadastres();
+
+  useEffect(() => {
+    setTimeout(() => {
+      console.log("🚀 CadastreList. Estado atual:", cadastres);
+    }, 1000);
+  }, [cadastres]);
 
   const dispatch = useDispatch()
 
@@ -27,6 +35,7 @@ export function CadastreList({ onEdit }: CadastreListProps) {
       dispatch(deleteCadastre(id))
     }
   }
+
 
   return (
     <Table>

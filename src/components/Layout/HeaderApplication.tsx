@@ -54,18 +54,16 @@ export default function HeaderHomeApplication() {
     }
 
     return (
-        <header className="bg-[#E2E4EE] w-full px-6 z-10 fixed drop-shadow-2xl shadow-xl">
+        <header className="bg-primary10 w-full  z-10 fixed shadow-lg">
             <div className="flex items-center justify-between h-20 container mx-auto">
-                <Link href={"/home"} className='w-32 md:w-44 h-full flex items-center justify-center'>
-                    <p className="text-primary30 text-xl font-bold">Iníco</p>
+                <Link href={"/home"} className=' h-full flex items-center justify-center'>
+                    <p className="text-sky-50 text-xl font-bold">Iníco</p>
                 </Link>
-                <Link href={"/bic"} className='w-32 md:w-44 h-full flex items-center justify-center'>
-                    <p className="text-primary30 text-xl font-bold">BIC</p>
-                </Link>
+
                 <div className="flex items-center gap-2">
                     <div className="text-end">
-                        <p className="font-bold text-lg leading-5 text-[#375582]">{formatName(user.name)}</p>
-                        <p className="text-xs md:text-base leading-5 text-[#0266AF]">{user.role}</p>
+                        <p className="font-bold text-lg leading-5 text-white">{formatName(user.name)}</p>
+                        <p className="text-xs md:text-base leading-5 text-sky-100">{user.role}</p>
                     </div>
                     <Sheet>
                         <SheetTrigger asChild>

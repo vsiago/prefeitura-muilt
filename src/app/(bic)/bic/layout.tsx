@@ -1,14 +1,16 @@
 // app/bic/layout.tsx
 "use client";
 
-import { DashboardNav } from "./dashboard-nav";
+import AsideBic from "@/components/Layout/AsideBic";
+import HeaderHomeApplication from "@/components/Layout/HeaderApplication";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function DashboardBicLayout({ children }: { children: React.ReactNode }) {
     return (
         <ProtectedRoute>
             <div className="flex min-h-screen flex-col">
-                {/* <DashboardNav /> */}
+                <HeaderHomeApplication />
+                <AsideBic />
                 <div className="">{children}</div>
             </div>
         </ProtectedRoute>

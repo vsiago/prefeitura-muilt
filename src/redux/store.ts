@@ -1,11 +1,15 @@
+// store.ts
+
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
-import bicReducer from "./slices/bicSlice";
+import cadastresReducer from "./slices/cadastresSlice";
+import techniciansReducer from "./slices/techniciansSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    bic: bicReducer, // 🔹 Confirme que não existe "cadastre" aqui
+    cadastres: cadastresReducer,
+    technicians: techniciansReducer,
   },
 });
 

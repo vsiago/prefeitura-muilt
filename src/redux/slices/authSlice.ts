@@ -14,6 +14,9 @@ export interface App {
 }
 
 export interface User {
+  usersByGroup(usersByGroup: any): unknown;
+  specificApplications: any;
+  usersByGroups: any;
   id: string;
   name: string;
   role: "Master" | "Cidadão" | "Servidor" | "Técnico" | "Servidor";

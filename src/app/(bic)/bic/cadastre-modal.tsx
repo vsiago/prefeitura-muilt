@@ -25,11 +25,12 @@ import {
 } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Slider } from "@/components/ui/slider"
-import type { RootState } from "./store/store"
-import { updateCurrentCadastre, addCadastre, editCadastre } from "./store/cadastreSlice"
+import type { RootState } from "@/redux/store"
+import { updateCurrentCadastre, addCadastre, editCadastre } from "@/redux/slices/cadastresSlice"
 import { v4 as uuidv4 } from "uuid"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DialogTitle } from "@radix-ui/react-dialog"
+import { useCadastres } from "@/hooks/useCadastres"
 
 interface Cadastre {
   id?: string
@@ -73,14 +74,17 @@ export function CadastreModal({ isOpen, onClose, isEditing, resetCurrentCadastre
 }) {
 
   const dispatch = useDispatch()
-  const cadastres = useSelector((state: RootState) => state?.bic?.cadastres ?? []);
+
+  const { cadastres } = useCadastres();
 
   useEffect(() => {
-    console.log("Cadastres: " + cadastres)
-  }, [cadastres])
+    console.log("🚀 Modal. Estado atual:", cadastres);
+  }, [cadastres]); // Agora sempre executa quando os cadastres mudarem
 
-  // Garante que pegamos pelo menos um item da lista
-  const currentCadastre = cadastres.length > 0 ? cadastres[0] : { inscricao: "", lancamento: "" };
+
+  // Garante que pegamos um cadastro válido
+  const currentCadastre = useSelector((state: RootState) => state.cadastres.currentCadastre);
+
 
   const [currentStep, setCurrentStep] = useState(0)
 
@@ -98,8 +102,6 @@ export function CadastreModal({ isOpen, onClose, isEditing, resetCurrentCadastre
     { name: "Metragens", icon: Ruler },
     { name: "Informações sobre a construção", icon: Building2 },
   ]
-
-
 
 
   // Evita erro caso currentCadastre seja null
@@ -139,20 +141,28 @@ export function CadastreModal({ isOpen, onClose, isEditing, resetCurrentCadastre
   }
 
   const handleSave = () => {
-    if (isEditing) {
-      dispatch(editCadastre(currentCadastre as Cadastre))
-    } else {
-      dispatch(addCadastre({ ...currentCadastre, id: uuidv4() } as Cadastre))
-    }
-    dispatch(updateCurrentCadastre({})) // Clear the current cadastre
-    resetCurrentCadastre() // Reset the current cadastre in the parent component
-    setCurrentStep(0) // Reset to the first tab
-    onClose()
-  }
+    console.log("Salvando cadastro:", currentCadastre);
 
+    if (!currentCadastre || !currentCadastre.inscricao) {
+      console.error("Erro: Inscrição é obrigatória!");
+      return; // 🚨 Impede o cadastro se estiver vazio
+    }
+
+    if (isEditing) {
+      dispatch(editCadastre(currentCadastre as Cadastre));
+    } else {
+      console.log("📤 Enviando para Redux:", { ...currentCadastre, id: uuidv4() });
+      dispatch(addCadastre({ ...currentCadastre, id: uuidv4() } as Cadastre));
+    }
+
+    dispatch(updateCurrentCadastre({})); // 🔄 Reseta o cadastro no Redux
+    resetCurrentCadastre(); // 🔄 Reseta no estado do componente
+    setCurrentStep(0); // 🔄 Volta para a primeira etapa
+    onClose(); // 🔄 Fecha o modal
+  };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogTitle>Informações do Cadastro</DialogTitle>
+      <DialogTitle className="text-slate-500 text-xl text-center pt-10">Informações do Cadastro</DialogTitle>
       <DialogContent className="flex flex-col max-h-[90vh] max-w-3xl ">
         <div className="flex-grow overflow-y-auto">
           <Card className="border-sky-100 shadow-md ">
