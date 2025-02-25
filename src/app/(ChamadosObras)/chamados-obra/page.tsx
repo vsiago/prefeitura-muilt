@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import HeaderApplication from "@/components/Layout/HeaderApplication";
-import DashboardBicPage from "./DashboardBicPage";
 import AsideHome from "@/components/Layout/AsideHome";
 
 export default function Bic() {
@@ -16,7 +15,7 @@ export default function Bic() {
         if (!isLoading) {
             const isAuthorized = user && (
                 user.role === "Coordenador" ||
-                (user.role === "Técnico" && user.specificApplications?.includes("BIC"))
+                (user.role === "Técnico" && user.specificApplications?.includes("Chamados Obra"))
             );
             if (!isAuthorized) {
                 router.replace("/home");
@@ -31,7 +30,7 @@ export default function Bic() {
         <>
 
             <main className=" min-h-screen flex flex-col items-center justify-start pt-40">
-                <DashboardBicPage />
+                <h1 className="text-slate-500 text-5xl">Chamados Obra</h1>
             </main>
         </>
     );

@@ -70,7 +70,7 @@ export default function Login() {
 
         setTimeout(() => {
           if (user && user.role) {
-            router.replace(user.role === "Master" || user.role === "Técnico" ? "/dashboard/apps" : "/home");
+            router.replace(user.role === "Master" || user.role === "Técnico" ? "/home" : "/home");
           }
           setLoading(false);
         }, 3000);

@@ -17,9 +17,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
         if (!isAuthenticated) {
             router.replace("/login");
-        } else if (isDashboard && !["Master", "Técnico",].includes(user?.role || "")) {
+        } else if (isDashboard && !["Master"].includes(user?.role || "")) {
             router.replace("/home");
-        } else if (isHome && !["Cidadão", "Servidor", "Coordenador"].includes(user?.role || "")) {
+        } else if (isHome && !["Cidadão", "Servidor", "Técnico", "Coordenador"].includes(user?.role || "")) {
             router.replace("/dashboard/apps");
         }
     }, [isAuthenticated, isLoading, user, pathname, router]);

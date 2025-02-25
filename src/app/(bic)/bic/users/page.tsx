@@ -19,7 +19,7 @@ export default function Bic() {
         if (!isLoading) {
             const isAuthorized = user && (
                 user.role === "Coordenador" ||
-                (user.role === "Tecnico" && user.specificApplications?.includes("BIC"))
+                (user.role === "Técnico" && user.specificApplications?.includes("BIC"))
             );
             if (!isAuthorized) {
                 router.replace("/home");
@@ -125,9 +125,9 @@ export default function Bic() {
                                                         <SelectValue placeholder="Ação" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {!isPromoted && <SelectItem value="promote">Promover para Técnico</SelectItem>}
-                                                        {isPromoted && <SelectItem value="demote">Rebaixar para Servidor</SelectItem>}
-                                                        {isPromoted && <SelectItem value="promoted">Promovido como Técnico</SelectItem>}
+                                                        {!isPromoted && <SelectItem value="promote"><p className="text-slate-700">Instalar BIC</p></SelectItem>}
+                                                        {isPromoted && <SelectItem value="demote"><p className="text-slate-700">Desinstalar BIC</p></SelectItem>}
+                                                        {isPromoted && <SelectItem value="promoted"><p className="text-slate-700">Técnico BIC</p></SelectItem>}
                                                     </SelectContent>
                                                 </Select>
                                             </div>

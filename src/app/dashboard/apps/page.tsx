@@ -92,7 +92,7 @@ export default function Dashboard() {
                         <Button size={"lg"}>Novo aplicativo</Button>
                     </div>
                     <div className=" bg-white/50 border-2 border-white w-full min-h-44 rounded-3xl mb-10"></div>
-                    <Accordion type="multiple" defaultValue={["member", "tecnico", "admin", "master"]} className="flex gap-4">
+                    <Accordion type="multiple" defaultValue={["Servidor", "Técnico", "Coordenador", "Master"]} className="flex gap-4">
                         <AccordionItem value="member" className="border-b-2 border-slate-400/40 mx-5 md:mx-0 flex-1">
                             <AccordionTrigger className="text-base md:text-xl font-bold text-slate-500 hover:no-underline px-0 sm:px-0">
                                 Servidor

@@ -42,7 +42,7 @@ export default function Home() {
                     <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem}>
                         {user?.apps && Object.keys(user.apps).length > 0 ? (
                             Object.entries(user.apps).map(([category, apps]) => {
-                                const isCoordinator = user.role === "Coordenador";
+                                const isCoordinator = user.role === "Coordenador" || user.role === "Técnico";
                                 const specificApplications = isCoordinator && Array.isArray(user.specificApplications) ? user.specificApplications : [];
 
                                 // Criando os aplicativos específicos
@@ -55,7 +55,7 @@ export default function Home() {
                                 // Adicionando os aplicativos específicos à categoria "Coordenador"
                                 const validApps = Array.isArray(apps) ? apps : [];
 
-                                const allApps = category.toLowerCase() === "coordenador"
+                                const allApps = category.toLowerCase() === "Coordenador" || "Técnico"
                                     ? [...validApps, ...specificApps] // Junta os apps gerais e específicos
                                     : validApps; // Mantém só os gerais nas outras categorias
 
@@ -70,7 +70,7 @@ export default function Home() {
                                                 {allApps && allApps.length > 0 ? (
                                                     allApps.map((app) => {
                                                         const Icon = iconMap[app.name] || FileText;
-                                                        const isCoordinatorApp = user.role === "Coordenador" && user.specificApplications.includes(app.name);
+                                                        const isCoordinatorApp = user.role === "Coordenador" || "Técnico" && user.specificApplications.includes(app.name);
 
                                                         return (
                                                             <div
@@ -78,7 +78,7 @@ export default function Home() {
                                                                 className="cursor-pointer"
                                                                 onClick={() => {
                                                                     if (isCoordinatorApp) {
-                                                                        router.push(`/auth${app.url.replace(/^\/+/, "")}`);
+                                                                        router.push(`/auth${app.url.replace(/\s+/g, "").replace(/^\/+/, "")}`);
 
                                                                     } else {
                                                                         window.open(app.url, "_blank", "noopener,noreferrer"); // Nova aba
