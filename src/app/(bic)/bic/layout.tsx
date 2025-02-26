@@ -1,7 +1,7 @@
 // app/bic/layout.tsx
 "use client";
 
-import AsideBic from "@/components/Layout/AsideBic";
+import AsideBic from "./AsideBic";
 import HeaderHomeApplication from "@/components/Layout/HeaderApplication";
 import ProtectedRoute from "@/components/ProtectedRoute";
 

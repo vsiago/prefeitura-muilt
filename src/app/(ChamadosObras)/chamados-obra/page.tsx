@@ -3,8 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import HeaderApplication from "@/components/Layout/HeaderApplication";
-import AsideHome from "@/components/Layout/AsideHome";
 
 export default function Bic() {
     const router = useRouter();
