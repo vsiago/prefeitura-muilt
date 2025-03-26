@@ -85,7 +85,7 @@ export default function UnidadeLayout({
                 {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
               </Button>
 
-              <Link href="/" className="mr-4">
+              <Link href="/biometrico-saude" className="mr-4">
                 <Image
                   src="/logo-municipio-itaguai2.svg"
                   alt="Prefeitura de Itaguaí"
@@ -96,7 +96,7 @@ export default function UnidadeLayout({
               </Link>
 
               <div className="hidden md:flex items-center">
-                <Link href="/" className="text-gray-500 hover:text-gray-700">
+                <Link href="/biometrico-saude" className="text-gray-500 hover:text-gray-700">
                   Unidades
                 </Link>
                 <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />
@@ -117,18 +117,16 @@ export default function UnidadeLayout({
       <div className="flex flex-1">
         {/* Sidebar específica da unidade */}
         <aside
-          className={`bg-white shadow-md w-64 transition-all duration-300 ease-in-out ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } fixed md:static z-10`}
+          className={`bg-white shadow-md w-64 transition-all duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } fixed md:static z-10`}
         >
           <nav className="p-4">
             <ul className="space-y-2">
               <li>
                 <Link
-                  href={`/unidades/${slug}`}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
-                    activeMenuItem === "overview" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  href={`/biometrico-saude/unidades/${slug}`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${activeMenuItem === "overview" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   <Home size={18} />
                   <span>Visão Geral</span>
@@ -136,10 +134,9 @@ export default function UnidadeLayout({
               </li>
               <li>
                 <Link
-                  href={`/unidades/${slug}/funcionarios`}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
-                    activeMenuItem === "funcionarios" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  href={`/biometrico-saude/unidades/${slug}/funcionarios`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${activeMenuItem === "funcionarios" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   <Users size={18} />
                   <span>Funcionários</span>
@@ -147,10 +144,9 @@ export default function UnidadeLayout({
               </li>
               <li>
                 <Link
-                  href={`/unidades/${slug}/calendario`}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
-                    activeMenuItem === "calendario" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  href={`/biometrico-saude/unidades/${slug}/calendario`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${activeMenuItem === "calendario" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   <Calendar size={18} />
                   <span>Calendário</span>
@@ -158,10 +154,9 @@ export default function UnidadeLayout({
               </li>
               <li>
                 <Link
-                  href={`/unidades/${slug}/relatorios`}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
-                    activeMenuItem === "relatorios" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  href={`/biometrico-saude/unidades/${slug}/relatorios`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${activeMenuItem === "relatorios" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   <FileText size={18} />
                   <span>Relatórios</span>
@@ -169,10 +164,9 @@ export default function UnidadeLayout({
               </li>
               <li>
                 <Link
-                  href={`/unidades/${slug}/configuracoes`}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
-                    activeMenuItem === "configuracoes" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  href={`/biometrico-saude/unidades/${slug}/configuracoes`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${activeMenuItem === "configuracoes" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                    }`}
                 >
                   <Settings size={18} />
                   <span>Configurações</span>

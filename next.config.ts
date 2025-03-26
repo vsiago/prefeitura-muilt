@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 import dotenv from 'dotenv';
 
-// Carrega as variáveis do arquivo .env
 dotenv.config();
 
 const nextConfig: NextConfig = {
@@ -17,6 +16,11 @@ const nextConfig: NextConfig = {
         protocol: 'http',
         hostname: process.env.NEXT_PUBLIC_HOST,
         port: process.env.NEXT_PUBLIC_PORT_2,
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'biometrico.itaguai.rj.gov.br', // ✅ Adicionando o domínio diretamente
         pathname: '/**',
       },
     ],

@@ -441,13 +441,12 @@ export default function Home() {
             <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
 
             <Link
-              href={`/unidades/${
-                unidade.slug ||
+              href={`/biometrico-saude/unidades/${unidade.slug ||
                 unidade.nome
                   .toLowerCase()
                   .replace(/[^\w\s]/gi, "")
                   .replace(/\s+/g, "-")
-              }`}
+                }`}
               className="block h-full"
             >
               <div className="relative h-48 overflow-hidden">
