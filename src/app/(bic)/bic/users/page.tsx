@@ -12,8 +12,8 @@ export default function Bic() {
     const router = useRouter();
     const { user, isLoading } = useAuth();
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedActions, setSelectedActions] = useState({});
-    const [updatedUsers, setUpdatedUsers] = useState({});
+    const [selectedActions, setSelectedActions] = useState<Record<string, string>>({});
+    const [updatedUsers, setUpdatedUsers] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         if (!isLoading) {
@@ -30,16 +30,16 @@ export default function Bic() {
     if (isLoading || !user) return null;
 
     const groupNames = Object.keys(user.usersByGroup);
-    const filteredUsers = (users) => users.filter(({ fullName, username }) =>
+    const filteredUsers = (users: any[]) => users.filter(({ fullName, username }) =>
         fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         username.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const promoteUser = async (username) => {
+    const promoteUser = async (username: any) => {
         const token = localStorage.getItem("token");
         try {
             await axios.post(
-                "http://localhost:3333/api/apps/instal-tecnico",
+                "https://api.prefeitura.itaguai.rj.gov.br/api/apps/instal-tecnico",
                 { username, apps: ["BIC"] },
                 { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
             );
@@ -51,11 +51,11 @@ export default function Bic() {
         }
     };
 
-    const demoteUser = async (username) => {
+    const demoteUser = async (username: any) => {
         const token = localStorage.getItem("token");
         try {
             await axios.post(
-                "http://localhost:3333/api/apps/uninstall",
+                "https://api.prefeitura.itaguai.rj.gov.br/api/apps/uninstall",
                 { username, apps: ["BIC"] },
                 { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
             );
@@ -107,7 +107,7 @@ export default function Bic() {
                                                     }`}
                                             >
                                                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 text-white font-semibold text-lg mr-4">
-                                                    {user.fullName.split(" ").map((n) => n[0]).join("")}
+                                                    {user.fullName.split(" ").map((n: any[]) => n[0]).join("")}
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="font-medium text-gray-800">{user.fullName}</p>

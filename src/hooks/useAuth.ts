@@ -16,7 +16,7 @@ export function useAuth() {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       if (!token) return;
 
-      const response = await axios.get("http://localhost:3333/api/users/me", {
+      const response = await axios.get("https://api.prefeitura.itaguai.rj.gov.br/api/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
 

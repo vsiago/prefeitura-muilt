@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import DashboardBicPage from "./DashboardBicPage";
 
 export default function Bic() {
     const router = useRouter();
@@ -29,7 +28,7 @@ export default function Bic() {
         <>
 
             <main className=" min-h-screen flex flex-col items-center justify-start pt-40">
-                <DashboardBicPage />
+                <h1>Dashboard BIC</h1>
             </main>
         </>
     );

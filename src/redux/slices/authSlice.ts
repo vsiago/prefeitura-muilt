@@ -14,13 +14,16 @@ export interface App {
 }
 
 export interface User {
-  usersByGroup(usersByGroup: any): unknown;
-  specificApplications: any;
+  photo: undefined;
+  username: string;
+  usersByGroup: Record<string, any[]>;
+  specificApplications?: string[];
   usersByGroups: any;
   id: string;
   name: string;
-  role: "Master" | "Cidadão" | "Servidor" | "Técnico" | "Servidor";
+  role: "Master" | "Cidadão" | "Servidor" | "Técnico" | "Coordenador";
   apps: App[];
+
 }
 
 export interface AuthState {

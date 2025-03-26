@@ -1,18 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get("token")?.value || "";
+  const token = req.cookies.get('token')?.value
 
-  const protectedRoutes = ["/dashboard/apps", "/home"];
-  const publicRoutes = ["/login", "/register"];
-
-  if (!token && protectedRoutes.includes(req.nextUrl.pathname)) {
-    return NextResponse.redirect(new URL("/login", req.url));
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  return NextResponse.next();
+  return NextResponse.next()
 }
 
+// Definir quais rotas o middleware será aplicado
 export const config = {
-  matcher: ["/dashboard/apps", "/home", "/login"],
-};
+  matcher: ['/home', '/dashboard', '/perfil'],
+}

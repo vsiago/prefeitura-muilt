@@ -12,8 +12,7 @@ export default function Bic() {
     useEffect(() => {
         if (!isLoading) {
             const isAuthorized = user && (
-                user.role === "Coordenador" ||
-                (user.role === "Técnico" && user.specificApplications?.includes("Chamados Obra"))
+                user.role === "Coordenador" || user.role === "Técnico" && (user.specificApplications?.includes("Chamados Obra"))
             );
             if (!isAuthorized) {
                 router.replace("/home");

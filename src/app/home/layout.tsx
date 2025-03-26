@@ -14,7 +14,7 @@ export default function DashboardLayout({
     return (
         <ProtectedRoute>
             <HeaderHome />
-            <AsideHome />
+            {/* <AsideHome /> */}
             <main className="w-full">{children}</main>
         </ProtectedRoute>
     );

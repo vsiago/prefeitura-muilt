@@ -44,7 +44,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3333/api/users/login", {
+      const response = await fetch("https://api.prefeitura.itaguai.rj.gov.br/api/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,6 +128,7 @@ export default function Login() {
                   className="pl-5"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  autoCapitalize="none"
                   required
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">

@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 // ir
 const nextConfig: NextConfig = {
-   eslint: {
+  eslint: {
     ignoreDuringBuilds: true,
   },
 };
