@@ -36,9 +36,6 @@ export default function HeaderDashboard() {
     return (
         <header className="bg-primary10 w-full lg:pl-44 xl:pl-72 px-6 relative z-10">
             <div className="flex items-center justify-between h-20 container mx-auto">
-                <div className='w-32 md:w-44 h-full flex items-center justify-center'>
-                    <Image width={200} height={100} alt='logo da prefeitura' src={"/logo-prefeitura-horizontal.svg"} className='object-contain' />
-                </div>
                 <div className="flex items-center gap-2">
                     <div className="text-end">
                         <p className="text-white font-bold text-base leading-5">{user.name}</p>

@@ -26,8 +26,8 @@ export default function Bic() {
     return (
         <>
 
-            <main className=" min-h-screen flex flex-col items-center justify-start pt-40">
-                <h1 className="text-slate-500 text-5xl">Chamados Obra</h1>
+            <main className=" min-h-screen flex container mx-auto flex-col items-start justify-start pt-40">
+                <h1 className="text-slate-700 text-3xl">Sistema de Chamados de Obras</h1>
             </main>
         </>
     );

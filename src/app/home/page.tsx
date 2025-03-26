@@ -4,11 +4,12 @@ import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useSelector } from "react-redux";
 import { selectUser } from "@/redux/slices/authSlice";
-import { LucideIcon, Mail, FileText, Landmark, Warehouse, Users, Newspaper, Eye, DollarSign, FileCheck2, HousePlug } from "lucide-react";
+import { LucideIcon, Mail, FileText, Landmark, Warehouse, Users, Newspaper, Eye, DollarSign, FileCheck2, HousePlug, Hammer, HeartPulse } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 const iconMap: Record<string, LucideIcon> = {
     "Reurb": Landmark,
+    "Chamados Obra": Hammer,
     "ItaMail": Mail,
     "Itadesk": FileText,
     "Protocolo": FileCheck2,
@@ -19,7 +20,8 @@ const iconMap: Record<string, LucideIcon> = {
     "Jornal Oficial": Newspaper,
     "Transparência": Eye,
     "ISS": DollarSign,
-    "Emissão da 2ª via de IPTU": FileCheck2
+    "Emissão da 2ª via de IPTU": FileCheck2,
+    "Biométrico Saúde": HeartPulse
 };
 
 export default function Home() {
@@ -54,22 +56,29 @@ export default function Home() {
                             // Adicionando os aplicativos específicos à categoria "Coordenador"
                             const validApps = Array.isArray(apps) ? apps : [];
 
-                            const allApps = category.toLowerCase() === "Coordenador" || "Técnico"
-                                ? [...validApps, ...specificApps] // Junta os apps gerais e específicos
-                                : validApps; // Mantém só os gerais nas outras categorias
+                            const allApps =
+                                (category.toLowerCase() === "coordenador" || category.toLowerCase() === "técnico")
+                                    ? [...validApps, ...specificApps]
+                                    : validApps.filter(app => !specificApplications.includes(app.name));
+
+                            // Renomear para "Secretário" se o usuário for Coordenador e tiver "Biométrico Saúde"
+                            const accordionTitle =
+                                user?.role === "Coordenador" && user?.specificApplications?.includes("Biométrico Saúde") && category.toLowerCase() === "coordenador"
+                                    ? "Secretário"
+                                    : category;
 
                             console.log("Final Apps for Category:", category, allApps);
                             return (
-                                <AccordionItem key={category} value={category} className="border-b-2 border-slate-400/40 md:mx-0">
-                                    <AccordionTrigger className="md:text-xl text-xl font-bold capitalize mb-3 text-[#BDD7FF] hover:no-underline px-0 sm:px-0">
-                                        {category}
+                                <AccordionItem key={category} value={category} className="border-b border-slate-400/40 md:mx-0">
+                                    <AccordionTrigger className="md:text-xl text-xl font-bold capitalize text-[#BDD7FF] hover:no-underline px-0 sm:px-0">
+                                        {accordionTitle}
                                     </AccordionTrigger>
                                     <AccordionContent>
-                                        <div className="grid md:p-0 grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-6 container mx-auto">
+                                        <div className="grid md:p-0 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-6 container mx-auto">
                                             {allApps && allApps.length > 0 ? (
                                                 allApps.map((app) => {
                                                     const Icon = iconMap[app.name] || FileText;
-                                                    const isCoordinatorApp = user.role === "Coordenador" || user.role === "Técnico" && user?.specificApplications?.includes(app.name);
+                                                    const isCoordinatorApp = user?.role === "Coordenador" && user?.specificApplications?.includes(app.name) || user?.role === "Técnico" && user?.specificApplications?.includes(app.name);
 
                                                     return (
                                                         <div
@@ -77,17 +86,23 @@ export default function Home() {
                                                             className="cursor-pointer"
                                                             onClick={() => {
                                                                 if (isCoordinatorApp) {
-                                                                    router.push(`/auth${app.url.replace(/\s+/g, "").replace(/^\/+/, "")}`);
+                                                                    router.push(`/auth${app.url
+                                                                        .replace(/\s+/g, "")
+                                                                        .replace(/^\/+/, "")
+                                                                        .normalize("NFD") // Decompor caracteres acentuados
+                                                                        .replace(/[\u0300-\u036f]/g, "") // Remover sinais diacríticos
+                                                                        }`);
 
                                                                 } else {
                                                                     window.open(app.url, "_blank", "noopener, noreferrer"); // Nova aba
+                                                                    setSelectedApp(app.url); // Exibir no iframe
                                                                 }
                                                             }}
                                                         >
                                                             <div className="bg-white/80 border-2 border-white/20 shadow-sm rounded-[15%] flex flex-col items-center p-5 lg:p-5 justify-center aspect-square hover:cursor-pointer text-primary10 hover:bg-white transition-all ease-in duration-200">
                                                                 <Icon className="w-14 h-14 text-[#0266AE]" />
                                                             </div>
-                                                            <p className="text-center text-sm lg:text-lg font-semibold text-white mt-2">
+                                                            <p className="text-center text-sm lg:text-lg font-semibold text-white mt-2 leading-5">
                                                                 {app.name}
                                                             </p>
                                                         </div>
@@ -116,7 +131,7 @@ export default function Home() {
                     <div className="mt-10">
                         <h2 className="text-2xl font-semibold text-white mb-5">Visualização:</h2>
                         <iframe
-                            src={selectedApp}
+                            src={'http://localhost:3333/proxy' + selectedApp}
                             width="100%"
                             height="600px"
                             className="border rounded-lg"

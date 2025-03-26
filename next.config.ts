@@ -1,9 +1,25 @@
 import type { NextConfig } from "next";
+import dotenv from 'dotenv';
 
-// ir
+// Carrega as variáveis do arquivo .env
+dotenv.config();
+
 const nextConfig: NextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: process.env.NEXT_PUBLIC_HOST,
+        port: process.env.NEXT_PUBLIC_PORT_1,
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: process.env.NEXT_PUBLIC_HOST,
+        port: process.env.NEXT_PUBLIC_PORT_2,
+        pathname: '/**',
+      },
+    ],
   },
 };
 

@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import { DialogTitle } from "../ui/dialog";
 import { X } from "lucide-react";
 
-
 export default function HeaderHome() {
     const dispatch = useDispatch();
     const router = useRouter();
@@ -54,6 +53,14 @@ export default function HeaderHome() {
         return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
     }
 
+    // Lógica para mudar o cargo para "Secretário" se as condições forem atendidas
+    function getUserRole() {
+        if (user?.role === "Coordenador" && user?.specificApplications?.includes("Biométrico Saúde")) {
+            return "Secretário";
+        }
+        return user?.role;
+    }
+
     if (!user) return null;
 
     return (
@@ -65,7 +72,7 @@ export default function HeaderHome() {
                 <div className="flex items-center gap-2">
                     <div className="text-end">
                         <p className="font-bold text-lg leading-5 text-[#375582]">{user?.name.split(" ")[0]}</p>
-                        <p className="text-xs md:text-base leading-5 text-[#0266AF]">{user.role}</p>
+                        <p className="text-xs md:text-base leading-5 text-[#0266AF]">{getUserRole()}</p>
                     </div>
                     <Sheet>
                         <SheetTrigger asChild>
@@ -108,12 +115,12 @@ export default function HeaderHome() {
                                 )}
 
                                 <h2 className="text-xl font-semibold text-gray-900 mt-3">{user.name}</h2>
-                                <p className="text-sm text-gray-500">{user.role}</p>
+                                <p className="text-sm text-gray-500">{getUserRole()}</p>
                             </div>
 
                             <div className="mt-6 space-y-2 text-gray-700 text-sm">
                                 <p><strong>Nome:</strong> {user.name}</p>
-                                <p><strong>Cargo:</strong> {user.role}</p>
+                                <p><strong>Cargo:</strong> {getUserRole()}</p>
                             </div>
 
                             <div className="flex-grow"></div>
