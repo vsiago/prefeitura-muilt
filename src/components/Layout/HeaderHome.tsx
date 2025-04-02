@@ -56,7 +56,7 @@ export default function HeaderHome() {
     // Lógica para mudar o cargo para "Secretário" se as condições forem atendidas
     function getUserRole() {
         if (user?.role === "Coordenador" && user?.specificApplications?.includes("Biométrico Saúde")) {
-            return "Secretário";
+            return "Master";
         }
         return user?.role;
     }

@@ -85,15 +85,7 @@ export default function UnidadeLayout({
                 {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
               </Button>
 
-              <Link href="/biometrico-saude" className="mr-4">
-                <Image
-                  src="/logo-municipio-itaguai2.svg"
-                  alt="Prefeitura de Itaguaí"
-                  width={100}
-                  height={50}
-                  className="h-10 w-auto"
-                />
-              </Link>
+
 
               <div className="hidden md:flex items-center">
                 <Link href="/biometrico-saude" className="text-gray-500 hover:text-gray-700">

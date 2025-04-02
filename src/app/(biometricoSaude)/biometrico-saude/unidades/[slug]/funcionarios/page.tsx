@@ -331,28 +331,28 @@ export default function FuncionariosPage() {
 
       console.log("[BIOMETRIC] Payload enviado para o servidor biométrico:", JSON.stringify(payload, null, 2))
 
-      // Try to connect to the biometric server with a timeout
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+      // Exibir toast informando sobre o processo de cadastro biométrico
+      toast({
+        title: "Cadastro biométrico iniciado",
+        description: "Um programa local será aberto. O processo pode levar até 1 minuto para concluir.",
+        duration: 10000, // Toast fica visível por 10 segundos
+      })
 
       try {
-        const response = await fetch("https://27fc-45-169-84-2.ngrok-free.app/register", {
+        // Sem AbortController com timeout, pois sabemos que pode demorar até 1 minuto
+        const response = await fetch("https://c850-45-169-84-2.ngrok-free.app/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
-          signal: controller.signal,
         })
-
-        clearTimeout(timeoutId)
 
         const data = await response.json()
         console.log("[BIOMETRIC] Resposta completa do servidor biométrico:", JSON.stringify(data, null, 2))
 
         if (data.user && data.user.id_biometrico) {
           // Mapear os campos da resposta para o estado do funcionário
-          // A API retorna 'nome' mas enviamos como 'userName'
           const updatedFuncionario = {
             ...currentFuncionario,
             id_biometrico: data.user.id_biometrico,
@@ -378,24 +378,22 @@ export default function FuncionariosPage() {
           throw new Error(data.message || "Falha ao registrar biometria")
         }
       } catch (fetchError) {
-        clearTimeout(timeoutId)
         console.error("[BIOMETRIC] Erro na comunicação com o servidor biométrico:", fetchError)
 
-        // If we can't connect to the server, simulate a successful response for testing
-        if (fetchError.name === "AbortError" || fetchError.message.includes("fetch")) {
-          console.log("[BIOMETRIC] Servidor biométrico indisponível, usando modo de simulação")
+        // Se estamos em ambiente de desenvolvimento, simular uma resposta bem-sucedida
+        if (process.env.NODE_ENV === "development") {
+          console.log("[BIOMETRIC] Ambiente de desenvolvimento, usando modo de simulação")
 
-          // Generate a mock biometric ID (for testing purposes only)
+          // Gerar ID biométrico fictício para testes
           const mockBiometricId = `MOCK_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
 
-          // Show a warning toast
           toast({
             title: "Modo de simulação",
-            description: "Servidor biométrico indisponível. Usando modo de simulação para testes.",
+            description: "Simulando resposta do servidor biométrico para fins de teste.",
             variant: "warning",
           })
 
-          // Update the funcionario with the mock ID
+          // Atualizar o funcionário com o ID simulado
           const updatedFuncionario = {
             ...currentFuncionario,
             id_biometrico: mockBiometricId,
@@ -521,41 +519,36 @@ export default function FuncionariosPage() {
           <div className="flex flex-wrap md:flex-nowrap overflow-x-auto">
             <button
               onClick={() => setActiveTab("all")}
-              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${
-                activeTab === "all" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${activeTab === "all" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               Todos
             </button>
             <button
               onClick={() => setActiveTab("8h")}
-              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${
-                activeTab === "8h" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${activeTab === "8h" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               8h
             </button>
             <button
               onClick={() => setActiveTab("12h")}
-              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${
-                activeTab === "12h" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${activeTab === "12h" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               12h
             </button>
             <button
               onClick={() => setActiveTab("24h")}
-              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${
-                activeTab === "24h" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${activeTab === "24h" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               24h
             </button>
             <button
               onClick={() => setActiveTab("12x36")}
-              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${
-                activeTab === "12x36" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-3 md:px-4 py-2 font-medium text-xs md:text-sm whitespace-nowrap flex-1 md:flex-none ${activeTab === "12x36" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               12x36
             </button>
@@ -664,13 +657,12 @@ export default function FuncionariosPage() {
                   className={`flex flex-col items-center ${step <= currentStep ? "text-blue-600" : "text-gray-400"}`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
-                      step < currentStep
-                        ? "bg-blue-600 text-white"
-                        : step === currentStep
-                          ? "border-2 border-blue-600 text-blue-600"
-                          : "border-2 border-gray-300 text-gray-400"
-                    }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${step < currentStep
+                      ? "bg-blue-600 text-white"
+                      : step === currentStep
+                        ? "border-2 border-blue-600 text-blue-600"
+                        : "border-2 border-gray-300 text-gray-400"
+                      }`}
                   >
                     {step < currentStep ? <Check className="h-4 w-4" /> : step}
                   </div>
@@ -876,44 +868,55 @@ export default function FuncionariosPage() {
                     <div className="flex flex-col items-center justify-center gap-4">
                       <div className="relative">
                         <Fingerprint
-                          className={`h-16 w-16 ${
-                            biometricStatus === "success"
-                              ? "text-green-500"
-                              : biometricStatus === "error"
-                                ? "text-red-500"
-                                : "text-blue-500"
-                          }`}
+                          className={`h-16 w-16 ${biometricStatus === "success"
+                            ? "text-green-500"
+                            : biometricStatus === "error"
+                              ? "text-red-500"
+                              : "text-blue-500"
+                            }`}
                         />
                         {biometricStatus === "loading" && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
                           </div>
                         )}
+                        {biometricStatus === "idle" && !currentFuncionario.id_biometrico && (
+                          <p className="text-sm text-gray-600 text-center">
+                            Clique no botão abaixo para iniciar o cadastro da digital biométrica
+                          </p>
+                        )}
+
+                        {biometricStatus === "loading" && (
+                          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <p className="text-sm text-blue-700 text-center">
+                              Um programa local foi iniciado para capturar a digital. Este processo pode levar até 1
+                              minuto.
+                              <br />
+                              Por favor, siga as instruções no programa que foi aberto.
+                            </p>
+                          </div>
+                        )}
+
+                        {biometricStatus === "success" && (
+                          <div className="flex items-center gap-2 text-green-600 font-medium">
+                            <Check className="h-5 w-5" />
+                            <span>Biometria cadastrada com sucesso</span>
+                          </div>
+                        )}
+
+                        {biometricStatus === "error" && (
+                          <div className="flex items-center gap-2 text-red-600 font-medium">
+                            <AlertCircle className="h-5 w-5" />
+                            <span>Erro ao cadastrar biometria</span>
+                          </div>
+                        )}
+
+                        {currentFuncionario.id_biometrico && biometricStatus !== "loading" && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            ID Biométrico: {currentFuncionario.id_biometrico}
+                          </p>
+                        )}
                       </div>
-
-                      {biometricStatus === "idle" && !currentFuncionario.id_biometrico && (
-                        <p className="text-sm text-gray-600 text-center">
-                          Clique no botão abaixo para iniciar o cadastro da digital biométrica
-                        </p>
-                      )}
-
-                      {biometricStatus === "success" && (
-                        <div className="flex items-center gap-2 text-green-600 font-medium">
-                          <Check className="h-5 w-5" />
-                          <span>Biometria cadastrada com sucesso</span>
-                        </div>
-                      )}
-
-                      {biometricStatus === "error" && (
-                        <div className="flex items-center gap-2 text-red-600 font-medium">
-                          <AlertCircle className="h-5 w-5" />
-                          <span>Erro ao cadastrar biometria</span>
-                        </div>
-                      )}
-
-                      {currentFuncionario.id_biometrico && biometricStatus !== "loading" && (
-                        <p className="text-xs text-gray-500 mt-1">ID Biométrico: {currentFuncionario.id_biometrico}</p>
-                      )}
                     </div>
                   </div>
 
@@ -921,13 +924,12 @@ export default function FuncionariosPage() {
                     type="button"
                     onClick={handleBiometricRegistration}
                     disabled={biometricStatus === "loading"}
-                    className={`w-full flex items-center justify-center gap-2 ${
-                      biometricStatus === "success"
-                        ? "bg-green-500 hover:bg-green-600"
-                        : biometricStatus === "error"
-                          ? "bg-red-500 hover:bg-red-600"
-                          : "bg-blue-500 hover:bg-blue-600"
-                    }`}
+                    className={`w-full flex items-center justify-center gap-2 ${biometricStatus === "success"
+                      ? "bg-green-500 hover:bg-green-600"
+                      : biometricStatus === "error"
+                        ? "bg-red-500 hover:bg-red-600"
+                        : "bg-blue-500 hover:bg-blue-600"
+                      }`}
                   >
                     {biometricStatus === "loading" ? (
                       <>

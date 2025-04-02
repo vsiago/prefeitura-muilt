@@ -14,6 +14,7 @@ export interface App {
 }
 
 export interface User {
+  [x: string]: string;
   photo: undefined;
   username: string;
   usersByGroup: Record<string, any[]>;
@@ -21,7 +22,7 @@ export interface User {
   usersByGroups: any;
   id: string;
   name: string;
-  role: "Master" | "Cidadão" | "Servidor" | "Técnico" | "Coordenador";
+  role: "Master" | "Administrador" | "Cidadão" | "Servidor" | "Técnico" | "Coordenador";
   apps: App[];
 
 }

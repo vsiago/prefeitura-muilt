@@ -43,31 +43,43 @@ export default function Home() {
                 <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem}>
                     {user?.apps && Object.keys(user.apps).length > 0 ? (
                         Object.entries(user.apps).map(([category, apps]) => {
-                            const isCoordinator = user.role === "Coordenador" || user.role === "Técnico";
-                            const specificApplications = isCoordinator && Array.isArray(user.specificApplications) ? user.specificApplications : [];
+                            const isCoordinator = user.role === "Coordenador" || user.role === "Técnico" || user.role === "Master";
 
-                            // Criando os aplicativos específicos
-                            const specificApps = specificApplications.map((appName) => ({
-                                _id: appName,
-                                name: appName,
-                                url: `/${appName.toLowerCase()}`
+                            // Verifica se o usuário tem aplicativos específicos
+                            const specificApplications = isCoordinator && Array.isArray(user.specificApplications)
+                                ? user.specificApplications
+                                : [];
+
+
+                            // Criação dos aplicativos específicos com base no novo formato de objetos
+                            const specificApps = specificApplications.map((app) => ({
+                                _id: app._id,
+                                name: app.name,
+                                url: `/${app.name.toLowerCase().replace(/\s+/g, "-")}` // Melhor formatação para URL
                             }));
+
+
 
                             // Adicionando os aplicativos específicos à categoria "Coordenador"
                             const validApps = Array.isArray(apps) ? apps : [];
 
                             const allApps =
-                                (category.toLowerCase() === "coordenador" || category.toLowerCase() === "técnico")
+                                (category.toLowerCase() === "coordenador" || category.toLowerCase() === "técnico" ||
+                                    (category.toLowerCase() === "master" || user.role === "Master"))
                                     ? [...validApps, ...specificApps]
-                                    : validApps.filter(app => !specificApplications.includes(app.name));
+                                    : validApps.filter(app =>
+                                        !specificApplications.some(specApp => specApp.name === app.name)
+                                    );
 
-                            // Renomear para "Secretário" se o usuário for Coordenador e tiver "Biométrico Saúde"
+
+                            // Renomear para "Master" se o usuário for Coordenador e tiver o app "Biométrico Saúde"
                             const accordionTitle =
-                                user?.role === "Coordenador" && user?.specificApplications?.includes("Biométrico Saúde") && category.toLowerCase() === "coordenador"
-                                    ? "Secretário"
+                                user?.role === "Coordenador" &&
+                                    specificApplications.some(app => app.name === "Biométrico Saúde") &&
+                                    category.toLowerCase() === "coordenador"
+                                    ? category
                                     : category;
 
-                            console.log("Final Apps for Category:", category, allApps);
                             return (
                                 <AccordionItem key={category} value={category} className="border-b border-slate-400/40 md:mx-0">
                                     <AccordionTrigger className="md:text-xl text-xl font-bold capitalize text-[#BDD7FF] hover:no-underline px-0 sm:px-0">
@@ -75,10 +87,12 @@ export default function Home() {
                                     </AccordionTrigger>
                                     <AccordionContent>
                                         <div className="grid md:p-0 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-6 container mx-auto">
-                                            {allApps && allApps.length > 0 ? (
+                                            {allApps.length > 0 ? (
                                                 allApps.map((app) => {
                                                     const Icon = iconMap[app.name] || FileText;
-                                                    const isCoordinatorApp = user?.role === "Coordenador" && user?.specificApplications?.includes(app.name) || user?.role === "Técnico" && user?.specificApplications?.includes(app.name);
+
+                                                    const isCoordinatorApp = isCoordinator &&
+                                                        specificApplications.some(specApp => specApp.name === app.name);
 
                                                     return (
                                                         <div
@@ -89,13 +103,12 @@ export default function Home() {
                                                                     router.push(`/auth${app.url
                                                                         .replace(/\s+/g, "")
                                                                         .replace(/^\/+/, "")
-                                                                        .normalize("NFD") // Decompor caracteres acentuados
-                                                                        .replace(/[\u0300-\u036f]/g, "") // Remover sinais diacríticos
+                                                                        .normalize("NFD")
+                                                                        .replace(/[\u0300-\u036f]/g, "")
                                                                         }`);
-
                                                                 } else {
-                                                                    window.open(app.url, "_blank", "noopener, noreferrer"); // Nova aba
-                                                                    setSelectedApp(app.url); // Exibir no iframe
+                                                                    window.open(app.url, "_blank", "noopener, noreferrer");
+                                                                    setSelectedApp(app.url);
                                                                 }
                                                             }}
                                                         >
@@ -121,23 +134,7 @@ export default function Home() {
                     ) : (
                         <p className="text-gray-500 text-center">Nenhum aplicativo disponível</p>
                     )}
-
-
-
                 </Accordion>
-
-                {/* Área do iframe */}
-                {selectedApp && (
-                    <div className="mt-10">
-                        <h2 className="text-2xl font-semibold text-white mb-5">Visualização:</h2>
-                        <iframe
-                            src={'http://localhost:3333/proxy' + selectedApp}
-                            width="100%"
-                            height="600px"
-                            className="border rounded-lg"
-                        ></iframe>
-                    </div>
-                )}
             </div>
         </main>
     );

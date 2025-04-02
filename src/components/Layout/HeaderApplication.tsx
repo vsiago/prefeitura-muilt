@@ -27,7 +27,7 @@ export default function HeaderHomeApplication() {
 
     // Definindo o valor de displayRole baseado nas condições
     const displayRole = user.role === 'Coordenador' && user.specificApplications?.includes('Biométrico Saúde')
-        ? 'Secretário'
+        ? 'Master'
         : user.role;
 
     // Função para extrair as iniciais do nome e sobrenome

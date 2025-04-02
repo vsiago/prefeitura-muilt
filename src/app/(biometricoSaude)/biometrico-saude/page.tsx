@@ -3,6 +3,8 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../../hooks/useAuth";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Upload, Trash2, Pencil, MoreVertical } from "lucide-react"
@@ -34,10 +36,94 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
+  const [totalFuncionarios, setTotalFuncionarios] = useState(0)
+
+  const [coordenadorDialogOpen, setCoordenadorDialogOpen] = useState(false)
+  const [coordenadorUsername, setCoordenadorUsername] = useState("")
+  const router = useRouter();
+  const { user } = useAuth();
+
+  // Impede acesso de Coordenador à página /biometrico-saude
+  useEffect(() => {
+    if (user && user.role === "Coordenador") {
+      const biometricoSaudeApp = user.specificApplications.find(app => app.name === "Biométrico Saúde");
+      if (biometricoSaudeApp?.unit) {
+        router.replace(`/biometrico-saude/unidades/${biometricoSaudeApp.unit}`);
+      } else {
+        router.replace("/home");
+      }
+    }
+  }, [user, router]);
+
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     if (!isLoading && user) {
+  //       const specificApplications = user.specificApplications || [];
+  //       const biometricoSaudeApp = specificApplications.find(app => app.name === "Biométrico Saúde");
+
+  //       if (biometricoSaudeApp) {
+  //         if (user.role === "Coordenador" && biometricoSaudeApp.unit) {
+  //           router.replace(`/biometrico-saude/unidades/${biometricoSaudeApp.unit}`);
+  //           return;
+  //         } else if (user.role === "Master" && biometricoSaudeApp.unit === "Master") {
+  //           router.replace("/biometrico-saude");
+  //         } else if (user.role === "Técnico") {
+  //           router.replace("/biometrico-saude");
+  //         } else {
+  //           router.replace("/home");
+  //         }
+  //       } else {
+  //         router.replace("/home");
+  //       }
+
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   const timer = setTimeout(checkAuth, 3000);
+  //   return () => clearTimeout(timer);
+  // }, [user, isLoading, router]);
+
 
   useEffect(() => {
-    fetchUnidades()
+    fetchUnidades().then(() => {
+      if (unidades.length > 0) {
+        fetchTotalFuncionarios()
+      }
+    })
   }, [])
+
+
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      const biometricoSaudeApp = user.specificApplications?.find(app => app.name === "Biométrico Saúde");
+
+      if (biometricoSaudeApp) {
+        if (user.role === "Coordenador" && biometricoSaudeApp.unit) {
+          router.replace(`/biometrico-saude/unidades/${biometricoSaudeApp.unit}`);
+          return;
+        } else if (user.role === "Master" && biometricoSaudeApp.unit === "Master") {
+          router.replace("/biometrico-saude");
+        } else if (user.role === "Técnico") {
+          router.replace("/biometrico-saude");
+        } else {
+          router.replace("/home");
+        }
+      } else {
+        router.replace("/home");
+      }
+
+      setIsLoading(false);
+    }
+  }, [user, isLoading, router]);
+
+  // Adicione outro useEffect para atualizar o total quando as unidades mudarem
+  useEffect(() => {
+    if (unidades.length > 0) {
+      fetchTotalFuncionarios()
+    }
+  }, [unidades])
 
   const fetchUnidades = async () => {
     setIsLoading(true)
@@ -53,6 +139,27 @@ export default function Home() {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchTotalFuncionarios = async () => {
+    try {
+      // Buscar funcionários de todas as unidades
+      let total = 0
+      for (const unidade of unidades) {
+        try {
+          const funcionarios = await fetch(`${BASE_URL}/func/funcionarios/${unidade.id}`).then((res) =>
+            res.ok ? res.json() : [],
+          )
+          total += Array.isArray(funcionarios) ? funcionarios.length : 0
+        } catch (error) {
+          console.error(`Erro ao buscar funcionários da unidade ${unidade.id}:`, error)
+        }
+      }
+      setTotalFuncionarios(total)
+    } catch (error) {
+      console.error("Erro ao calcular total de funcionários:", error)
+      setTotalFuncionarios(0)
     }
   }
 
@@ -294,6 +401,69 @@ export default function Home() {
     }
   }
 
+  const handleCadastrarCoordenador = async () => {
+    if (!currentUnidade) return
+
+    if (!coordenadorUsername || !coordenadorUsername.includes(".")) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um nome de usuário válido no formato user.name",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      // Obter token do usuário Master logado (você precisará implementar isso conforme sua autenticação)
+      const token = localStorage.getItem("token") || sessionStorage.getItem("authToken") || ""
+
+      const payload = {
+        username: coordenadorUsername,
+        apps: [
+          {
+            name: "Biométrico Saúde",
+            type: "Coordenador",
+            unit:
+              currentUnidade.slug ||
+              currentUnidade.nome
+                .toLowerCase()
+                .replace(/[^\w\s]/gi, "")
+                .replace(/\s+/g, "-"),
+          },
+        ],
+      }
+
+      const response = await fetch("https://api.prefeitura.itaguai.rj.gov.br/api/apps/install", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Falha ao cadastrar coordenador: ${response.status} ${response.statusText} - ${errorText}`)
+      }
+
+      toast({
+        title: "Sucesso",
+        description: `Coordenador ${coordenadorUsername} cadastrado com sucesso para a unidade ${currentUnidade.nome}`,
+      })
+
+      setCoordenadorDialogOpen(false)
+      setCoordenadorUsername("")
+    } catch (error) {
+      console.error("Erro ao cadastrar coordenador:", error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível cadastrar o coordenador. Verifique se você tem permissões adequadas.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const filteredUnidades = unidades.filter(
     (unidade) =>
       unidade.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -395,7 +565,7 @@ export default function Home() {
             </div>
             <div>
               <div className="text-xs text-gray-500">Total de Funcionários</div>
-              <div className="font-semibold text-green-700">{unidades.length * 20}</div>
+              <div className="font-semibold text-green-700">{totalFuncionarios}</div>
             </div>
           </div>
         </div>
@@ -441,7 +611,7 @@ export default function Home() {
             <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
 
             <Link
-              href={`/biometrico-saude/unidades/${unidade.slug ||
+              href={`biometrico-saude/unidades/${unidade.slug ||
                 unidade.nome
                   .toLowerCase()
                   .replace(/[^\w\s]/gi, "")
@@ -547,6 +717,33 @@ export default function Home() {
                   <DropdownMenuItem onClick={() => handleOpenDialog(unidade)} className="cursor-pointer">
                     <Pencil className="h-4 w-4 mr-2" />
                     Editar unidade
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setCurrentUnidade(unidade)
+                      setCoordenadorUsername("")
+                      setCoordenadorDialogOpen(true)
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4 mr-2"
+                    >
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    Cadastrar Coordenador
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => openConfirmDelete(unidade)}
@@ -657,6 +854,68 @@ export default function Home() {
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
               Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo para cadastrar coordenador */}
+      <Dialog open={coordenadorDialogOpen} onOpenChange={setCoordenadorDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-medium text-center mb-6">Cadastrar Coordenador</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="unidade-nome">Nome da unidade</Label>
+              <Input id="unidade-nome" value={currentUnidade?.nome || ""} className="bg-gray-100 mt-1" disabled />
+            </div>
+
+            <div>
+              <Label htmlFor="unidade-url">URL</Label>
+              <Input
+                id="unidade-url"
+                value={
+                  currentUnidade
+                    ? currentUnidade.slug ||
+                    currentUnidade.nome
+                      .toLowerCase()
+                      .replace(/[^\w\s]/gi, "")
+                      .replace(/\s+/g, "-")
+                    : ""
+                }
+                className="bg-gray-100 mt-1"
+                disabled
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="funcao">Função</Label>
+              <Input id="funcao" value="Coordenador" className="bg-gray-100 mt-1" disabled />
+            </div>
+
+            <div>
+              <Label htmlFor="username">Username (formato user.name)</Label>
+              <Input
+                id="username"
+                value={coordenadorUsername}
+                onChange={(e) => setCoordenadorUsername(e.target.value.toLowerCase())}
+                placeholder="exemplo.usuario"
+                className="bg-white mt-1 border-gray-300 focus:border-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Digite o nome de usuário no formato user.name (baseado no AD)
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setCoordenadorDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCadastrarCoordenador} className="bg-blue-500 hover:bg-blue-600 text-white">
+              Cadastrar Coordenador
             </Button>
           </DialogFooter>
         </DialogContent>
