@@ -58,7 +58,7 @@ export default function HeaderHomeApplicationSaude() {
     }
 
     return (
-        <header className="bg-primary10 w-full z-10 fixed shadow-lg">
+        <header className="bg-primary10 w-full z-50 fixed shadow-lg">
             <div className="flex items-center justify-between h-20 container mx-auto">
                 <Link href={"/home"} className=' h-full flex items-center justify-center'>
                     <p className="text-white text-xl font-bold">Início</p>

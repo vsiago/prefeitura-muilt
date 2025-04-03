@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Sistema de Biometria",
   description: "Sistema de Biometria para Unidades de Saúde",
-  generator: 'v0.dev'
+  generator: 'Prefeitura de Itaguaí'
 }
 
 export default function RootLayout({

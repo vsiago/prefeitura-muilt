@@ -340,7 +340,7 @@ export default function FuncionariosPage() {
 
       try {
         // Sem AbortController com timeout, pois sabemos que pode demorar até 1 minuto
-        const response = await fetch("https://c850-45-169-84-2.ngrok-free.app/register", {
+        const response = await fetch("https://6b45-45-169-84-2.ngrok-free.app/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
