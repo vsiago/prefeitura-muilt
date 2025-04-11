@@ -99,6 +99,7 @@ export default function CalendarioPage() {
                 `https://biometrico.itaguai.rj.gov.br/reg/levantamento-horas?funcionario_id=${funcionario_id}&ano=${ano}&mes=${mes}`,
               )
 
+
               if (response.ok) {
                 const registrosFuncionario = await response.json()
                 todosRegistros = [...todosRegistros, ...registrosFuncionario.registros]
@@ -184,7 +185,7 @@ export default function CalendarioPage() {
       const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos de timeout
 
       try {
-        const response = await fetch("https://6b45-45-169-84-2.ngrok-free.app/register_ponto", {
+        const response = await fetch("https://127.0.0.1:5000/register_ponto", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -595,9 +596,9 @@ export default function CalendarioPage() {
   }
 
   return (
-    <div>
+    <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Calendário de Ponto</h1>
+        <h1 className="text-2xl font-bold text-slate-600">Calendário de Ponto</h1>
         <div className="text-sm text-gray-500">{unidade.nome}</div>
       </div>
 
@@ -621,8 +622,8 @@ export default function CalendarioPage() {
               className="flex items-center gap-2"
               onClick={() => setIsReportDialogOpen(true)}
             >
-              <FileDown className="h-4 w-4" />
-              Gerar Relatório
+              <FileDown className="h-4 w-4 text-slate-600" />
+              <p className="text-slate-600">Gerar Relatório</p>
             </Button>
           </CardHeader>
           <CardContent>

@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { unidadeAPI, type Unidade } from "@/lib/api"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import HeaderHomeApplicationSaude from "../../../components/Layout/HeaderApplicationSaude";
 
 const BASE_URL = "https://biometrico.itaguai.rj.gov.br"
 
@@ -762,165 +763,167 @@ export default function Home() {
   )
 
   return (
-    <div className="container mx-auto py-6">
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      ) : unidades.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        renderUnidadesList()
-      )}
+    <>
+      <div className="container mx-auto py-6 pt-24">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : unidades.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          renderUnidadesList()
+        )}
 
-      {/* Diálogo para adicionar/editar unidade */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-medium text-center mb-6">
-              {isEditing ? "Editar unidade" : "Cadastro nova unidade"}
-            </DialogTitle>
-          </DialogHeader>
+        {/* Diálogo para adicionar/editar unidade */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-medium text-center mb-6">
+                {isEditing ? "Editar unidade" : "Cadastro nova unidade"}
+              </DialogTitle>
+            </DialogHeader>
 
-          <div className="grid gap-6">
-            <div className="flex justify-center">
-              <div
-                className="border-2 border-dashed border-gray-300 rounded-lg w-full h-48 flex flex-col items-center justify-center bg-gray-50 cursor-pointer overflow-hidden relative"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {previewImage !== "/placeholder.svg" ? (
-                  <Image src={previewImage || "/placeholder.svg"} alt="Preview" fill className="object-cover" />
-                ) : (
-                  <div className="text-center">
-                    <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500">Clique para fazer upload da imagem</p>
-                    <p className="text-gray-400 text-sm">PNG, JPG, GIF até 10MB</p>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageUpload}
+            <div className="grid gap-6">
+              <div className="flex justify-center">
+                <div
+                  className="border-2 border-dashed border-gray-300 rounded-lg w-full h-48 flex flex-col items-center justify-center bg-gray-50 cursor-pointer overflow-hidden relative"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {previewImage !== "/placeholder.svg" ? (
+                    <Image src={previewImage || "/placeholder.svg"} alt="Preview" fill className="object-cover" />
+                  ) : (
+                    <div className="text-center">
+                      <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">Clique para fazer upload da imagem</p>
+                      <p className="text-gray-400 text-sm">PNG, JPG, GIF até 10MB</p>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="nome">Nome da unidade</Label>
+                <Input
+                  id="nome"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  className="bg-gray-100 mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="localizacao">Endereço da unidade</Label>
+                <Input
+                  id="localizacao"
+                  value={formData.localizacao}
+                  onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
+                  className="bg-gray-100 mt-1"
                 />
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="nome">Nome da unidade</Label>
-              <Input
-                id="nome"
-                value={formData.nome}
-                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                className="bg-gray-100 mt-1"
-              />
+            <DialogFooter className="mt-6">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSaveUnidade} className="bg-blue-500 hover:bg-blue-600 text-white">
+                {isEditing ? "Salvar alterações" : "Adicionar unidade"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Novo diálogo de confirmação para excluir unidade */}
+        <Dialog open={confirmDeleteDialogOpen} onOpenChange={setConfirmDeleteDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Excluir unidade</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p>Tem certeza que deseja excluir a unidade "{currentUnidade?.nome}"? Esta ação não pode ser desfeita.</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={cancelDelete}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={confirmDelete}>
+                Excluir
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo para cadastrar coordenador */}
+        <Dialog open={coordenadorDialogOpen} onOpenChange={setCoordenadorDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-medium text-center mb-6">Cadastrar Coordenador</DialogTitle>
+            </DialogHeader>
+
+            <div className="grid gap-4">
+              <div>
+                <Label htmlFor="unidade-nome">Nome da unidade</Label>
+                <Input id="unidade-nome" value={currentUnidade?.nome || ""} className="bg-gray-100 mt-1" disabled />
+              </div>
+
+              <div>
+                <Label htmlFor="unidade-url">URL</Label>
+                <Input
+                  id="unidade-url"
+                  value={
+                    currentUnidade
+                      ? currentUnidade.slug ||
+                      currentUnidade.nome
+                        .toLowerCase()
+                        .replace(/[^\w\s]/gi, "")
+                        .replace(/\s+/g, "-")
+                      : ""
+                  }
+                  className="bg-gray-100 mt-1"
+                  disabled
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="funcao">Função</Label>
+                <Input id="funcao" value="Coordenador" className="bg-gray-100 mt-1" disabled />
+              </div>
+
+              <div>
+                <Label htmlFor="username">Username (formato user.name)</Label>
+                <Input
+                  id="username"
+                  value={coordenadorUsername}
+                  onChange={(e) => setCoordenadorUsername(e.target.value.toLowerCase())}
+                  placeholder="exemplo.usuario"
+                  className="bg-white mt-1 border-gray-300 focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Digite o nome de usuário no formato user.name (baseado no AD)
+                </p>
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="localizacao">Endereço da unidade</Label>
-              <Input
-                id="localizacao"
-                value={formData.localizacao}
-                onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
-                className="bg-gray-100 mt-1"
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="mt-6">
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveUnidade} className="bg-blue-500 hover:bg-blue-600 text-white">
-              {isEditing ? "Salvar alterações" : "Adicionar unidade"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Novo diálogo de confirmação para excluir unidade */}
-      <Dialog open={confirmDeleteDialogOpen} onOpenChange={setConfirmDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Excluir unidade</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p>Tem certeza que deseja excluir a unidade "{currentUnidade?.nome}"? Esta ação não pode ser desfeita.</p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={cancelDelete}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Diálogo para cadastrar coordenador */}
-      <Dialog open={coordenadorDialogOpen} onOpenChange={setCoordenadorDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-medium text-center mb-6">Cadastrar Coordenador</DialogTitle>
-          </DialogHeader>
-
-          <div className="grid gap-4">
-            <div>
-              <Label htmlFor="unidade-nome">Nome da unidade</Label>
-              <Input id="unidade-nome" value={currentUnidade?.nome || ""} className="bg-gray-100 mt-1" disabled />
-            </div>
-
-            <div>
-              <Label htmlFor="unidade-url">URL</Label>
-              <Input
-                id="unidade-url"
-                value={
-                  currentUnidade
-                    ? currentUnidade.slug ||
-                    currentUnidade.nome
-                      .toLowerCase()
-                      .replace(/[^\w\s]/gi, "")
-                      .replace(/\s+/g, "-")
-                    : ""
-                }
-                className="bg-gray-100 mt-1"
-                disabled
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="funcao">Função</Label>
-              <Input id="funcao" value="Coordenador" className="bg-gray-100 mt-1" disabled />
-            </div>
-
-            <div>
-              <Label htmlFor="username">Username (formato user.name)</Label>
-              <Input
-                id="username"
-                value={coordenadorUsername}
-                onChange={(e) => setCoordenadorUsername(e.target.value.toLowerCase())}
-                placeholder="exemplo.usuario"
-                className="bg-white mt-1 border-gray-300 focus:border-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Digite o nome de usuário no formato user.name (baseado no AD)
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="mt-6">
-            <Button variant="outline" onClick={() => setCoordenadorDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCadastrarCoordenador} className="bg-blue-500 hover:bg-blue-600 text-white">
-              Cadastrar Coordenador
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            <DialogFooter className="mt-6">
+              <Button variant="outline" onClick={() => setCoordenadorDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleCadastrarCoordenador} className="bg-blue-500 hover:bg-blue-600 text-white">
+                Cadastrar Coordenador
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   )
 }
 

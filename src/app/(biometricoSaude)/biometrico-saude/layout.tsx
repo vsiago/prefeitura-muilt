@@ -26,7 +26,8 @@ export default function RootLayout({
         <div className="flex min-h-screen bg-slate-100">
           <div className="flex-1">
             <HeaderHomeApplicationSaude />
-            <main className="p-4 mt-24">{children}</main>
+
+            <main className="pt-24">{children}</main>
           </div>
         </div>
         {/* </ThemeProvider> */}

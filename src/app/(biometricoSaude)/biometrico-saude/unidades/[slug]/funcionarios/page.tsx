@@ -46,6 +46,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import https from "https"
 
 export default function FuncionariosPage() {
   const params = useParams()
@@ -340,16 +341,20 @@ export default function FuncionariosPage() {
 
       try {
         // Sem AbortController com timeout, pois sabemos que pode demorar até 1 minuto
-        const response = await fetch("https://6b45-45-169-84-2.ngrok-free.app/register", {
+        const response = await fetch("https://127.0.0.1:5000/register", {
+          // Viadooo
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
-        })
+          agent: new https.Agent({
+            rejectUnauthorized: false, // Ignora erros de certificado SSL
+          }),
+        });
 
-        const data = await response.json()
-        console.log("[BIOMETRIC] Resposta completa do servidor biométrico:", JSON.stringify(data, null, 2))
+        const data = await response.json();
+        console.log("[BIOMETRIC] Resposta completa do servidor biométrico:", JSON.stringify(data, null, 2));
 
         if (data.user && data.user.id_biometrico) {
           // Mapear os campos da resposta para o estado do funcionário
@@ -363,19 +368,19 @@ export default function FuncionariosPage() {
             telefone: data.user.telefone || currentFuncionario.telefone,
             email: data.user.email || currentFuncionario.email,
             tipo_escala: data.user.tipo_escala || currentFuncionario.tipo_escala,
-          }
+          };
 
-          console.log("[BIOMETRIC] Funcionário atualizado após resposta:", JSON.stringify(updatedFuncionario, null, 2))
-          setCurrentFuncionario(updatedFuncionario)
+          console.log("[BIOMETRIC] Funcionário atualizado após resposta:", JSON.stringify(updatedFuncionario, null, 2));
+          setCurrentFuncionario(updatedFuncionario);
 
-          setBiometricStatus("success")
+          setBiometricStatus("success");
 
           toast({
             title: "Sucesso",
             description: "Biometria registrada com sucesso",
-          })
+          });
         } else {
-          throw new Error(data.message || "Falha ao registrar biometria")
+          throw new Error(data.message || "Falha ao registrar biometria");
         }
       } catch (fetchError) {
         console.error("[BIOMETRIC] Erro na comunicação com o servidor biométrico:", fetchError)
@@ -481,9 +486,9 @@ export default function FuncionariosPage() {
   }
 
   return (
-    <div>
+    <div className="p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold">Funcionários</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-600">Funcionários</h1>
         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <Button
             variant="outline"

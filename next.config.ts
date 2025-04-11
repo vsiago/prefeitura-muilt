@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         hostname: 'biometrico.itaguai.rj.gov.br', // ✅ Adicionando o domínio diretamente
         pathname: '/**',
       },
+      {
+        protocol: 'https', // Se o seu link de imagem for HTTP, use 'http'
+        hostname: 'hebbkx1anhila5yf.public.blob.vercel-storage.com', // Novo domínio
+        pathname: '/**',
+      },
     ],
   },
 };

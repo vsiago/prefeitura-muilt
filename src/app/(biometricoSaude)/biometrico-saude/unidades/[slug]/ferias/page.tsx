@@ -79,10 +79,10 @@ export default function Ferias() {
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 p-8 mt-2">
+      <h2 className="text-2xl font-bold text-slate-600 mb-6">Solicitações de Férias</h2>
       <div className="bg-white rounded-lg p-8 shadow-sm">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-semibold">Solicitações de Férias</h2>
           <Button onClick={() => setIsDialogOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-white">
             Nova Solicitação
           </Button>

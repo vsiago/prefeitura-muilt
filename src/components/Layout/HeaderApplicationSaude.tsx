@@ -63,7 +63,9 @@ export default function HeaderHomeApplicationSaude() {
                 <Link href={"/home"} className=' h-full flex items-center justify-center'>
                     <p className="text-white text-xl font-bold">Início</p>
                 </Link>
-                <Image src={"./group-logo-prefeitura-itaguai.svg"} width={400} height={90} alt="Logos grupo" />
+                <Image
+                    src={"/images/regua-logo-itaguai.png"}
+                    width={400} height={90} alt="Logos grupo" />
                 <div className="flex items-center gap-2">
                     <div className="text-end">
                         <p className="font-bold text-lg leading-5 text-white">{formatName(user.name)}</p>
