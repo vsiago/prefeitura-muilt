@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSelector } from "react-redux";
+import { selectUser } from "../../../../../../redux/slices/authSlice";
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -58,6 +60,7 @@ export default function CalendarioPage() {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const user = useSelector(selectUser);
 
   useEffect(() => {
     fetchData()
@@ -86,10 +89,10 @@ export default function CalendarioPage() {
           const funcionariosData = await funcionarioAPI.getByUnidade(unidadeData.id)
           setFuncionarios(funcionariosData)
 
-          console.log("Funcionarios da unidadeeeee: funcionariosData")
+          console.log("Funcionarios da unidadeeeee: ", funcionariosData)
 
           // Array para armazenar todos os registros de ponto
-          let todosRegistros = []
+          let todosRegistros: any[] = []
 
           // Para cada funcionário, buscar seus registros de ponto
           for (const funcionario of funcionariosData) {
@@ -136,7 +139,7 @@ export default function CalendarioPage() {
               hora_entrada: registro.hora_entrada || null,
               hora_saida: registro.hora_saida || null,
               hora_saida_ajustada: registro.hora_saida_ajustada || null,
-              horas_normais: registro.horas_normais || null,
+              horas_normais: registro.total_trabalhado || null,
               hora_extra: registro.hora_extra || null,
               hora_desconto: registro.hora_desconto || null,
               total_trabalhado: registro.total_trabalhado || null,
@@ -476,83 +479,112 @@ export default function CalendarioPage() {
     try {
       setIsLoading(true)
 
-      // Usar o novo endpoint para obter os dados do relatório
+      // 1. Buscar dados do funcionário
+      const funcionario = funcionarios.find(f => f.id === reportFuncionario)
+      if (!funcionario) {
+        throw new Error("Funcionário não encontrado")
+      }
+
+      // 2. Buscar registros da API
       const response = await fetch(
-        `https://biometrico.itaguai.rj.gov.br/relat/relatoriosempdf?funcionario_id=${reportFuncionario}&mes=${reportMonth}&ano=${reportYear}`,
+        `https://biometrico.itaguai.rj.gov.br/relat/relatoriosempdf?funcionario_id=${reportFuncionario}&mes=${reportMonth}&ano=${reportYear}`
       )
 
       if (!response.ok) {
-        throw new Error(`Erro ao buscar relatório: ${response.status}`)
+        throw new Error(`Erro na API: ${response.status}`)
       }
 
-      const reportData = await response.json()
+      let reportData = await response.json()
+      console.log("Dados brutos da API:", reportData)
 
-      // Log the raw API response
-      console.log("RAW API RESPONSE:", reportData)
+      // 3. Complementar com dados locais se necessário
+      if (!reportData.funcionario) {
+        reportData.funcionario = {
+          nome: funcionario.nome,
+          matricula: funcionario.matricula,
+          cargo: funcionario.cargo,
+          tipo_escala: funcionario.tipo_escala,
+          unidade_nome: unidade?.nome || "",
+          mes_ano: `${String(reportMonth).padStart(2, '0')}/${reportYear}`
+        }
+      }
 
-      // Ensure hora_desconto is included in each registro
-      if (reportData.registros && Array.isArray(reportData.registros)) {
-        reportData.registros.forEach((registro) => {
-          // Log each registro to see what properties it has
-          console.log(`REGISTRO BEFORE PROCESSING: ${registro.data}`, registro)
+      // 4. Processar registros
+      reportData.registros = reportData.registros.map(registro => {
+        // Função segura para parse de datas
+        const parseDateSafe = (dateString: string | Date | null | undefined): Date | null => {
+          if (!dateString) return null
+          try {
+            // Se já for um objeto Date, retorna diretamente
+            if (dateString instanceof Date) return dateString
 
-          // If hora_desconto is missing but exists in the API response, make sure it's included
-          if (registro.hora_desconto === undefined && registro.data) {
-            // Try to find the corresponding registro in the registrosPonto array
-            const matchingRegistro = registrosPonto.find((r) => {
-              // Convert dates to comparable format
-              const registroDate = r.data ? new Date(r.data.split("T")[0]) : null
-              const currentDate = registro.data ? new Date(registro.data.split("T")[0]) : null
-              return (
-                registroDate &&
-                currentDate &&
-                registroDate.getDate() === currentDate.getDate() &&
-                registroDate.getMonth() === currentDate.getMonth() &&
-                registroDate.getFullYear() === currentDate.getFullYear() &&
-                r.funcionario_id === reportFuncionario
-              )
-            })
-
-            if (matchingRegistro && matchingRegistro.hora_desconto) {
-              console.log(
-                `Adding hora_desconto from registrosPonto for ${registro.data}:`,
-                matchingRegistro.hora_desconto,
-              )
-              registro.hora_desconto = matchingRegistro.hora_desconto
-            }
+            // Para strings, tenta fazer o parse
+            const date = new Date(dateString)
+            return isNaN(date.getTime()) ? null : date
+          } catch {
+            return null
           }
+        }
 
-          // Log the registro after processing
-          console.log(`REGISTRO AFTER PROCESSING: ${registro.data}`, registro)
+        // Parse seguro da data
+        const registroDate = parseDateSafe(registro.data)
+        const formattedDate = registroDate ? format(registroDate, 'dd/MM/yyyy') : 'Data inválida'
+
+        // Encontrar registro correspondente no estado local
+        const localRegistro = registrosPonto.find(r => {
+          if (!r.data) return false
+          const localDate = parseDateSafe(r.data)
+          return localDate && registroDate &&
+            format(localDate, 'dd/MM/yyyy') === formattedDate
         })
-      }
 
-      // Gerar o PDF com os novos dados
+        return {
+          data: formattedDate,
+          hora_entrada: registro.hora_entrada || localRegistro?.hora_entrada || null,
+          hora_saida: registro.hora_saida || localRegistro?.hora_saida || null,
+          total_trabalhado: registro.total_trabalhado || localRegistro?.total_trabalhado || null,
+          horas_normais: registro.horas_normais || localRegistro?.horas_normais || null,
+          horas_extras: registro.horas_extras || localRegistro?.hora_extra || null,
+          hora_extra: registro.hora_extra || localRegistro?.hora_extra || null,
+          hora_desconto: registro.hora_desconto || localRegistro?.hora_desconto || "00:00:00",
+          justificativa: registro.justificativa || localRegistro?.justificativa || null,
+          ...(localRegistro ? {
+            hora_saida_ajustada: localRegistro.hora_saida_ajustada,
+            total_trabalhado_mes: localRegistro.total_trabalhado_mes,
+            total_hora_extra_mes: localRegistro.total_hora_extra_mes,
+            total_hora_desconto_mes: localRegistro.total_hora_desconto_mes
+          } : {})
+        }
+      })
+
+      console.log("Dados processados para PDF:", reportData)
+
+      // 5. Gerar PDF
       const pdfDataUrl = generateAttendanceReport(reportData)
 
-      // Criar um link para download
-      const link = document.createElement("a")
+      // 6. Forçar download
+      const link = document.createElement('a')
       link.href = pdfDataUrl
-      link.download = `relatorio_ponto_${reportData.funcionario.nome.replace(/\s+/g, "_")}_${reportMonth}_${reportYear}.pdf`
+      link.download = `relatorio_ponto_${funcionario.nome.replace(/\s+/g, '_')}_${reportMonth}_${reportYear}.pdf`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
 
-      setIsReportDialogOpen(false)
-
       toast({
         title: "Sucesso",
-        description: "Relatório gerado com sucesso",
+        description: "Relatório gerado com sucesso"
       })
+
     } catch (error) {
       console.error("Erro ao gerar relatório:", error)
       toast({
         title: "Erro",
-        description: "Não foi possível gerar o relatório",
-        variant: "destructive",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive"
       })
     } finally {
       setIsLoading(false)
+      setIsReportDialogOpen(false)
     }
   }
 
@@ -904,10 +936,14 @@ export default function CalendarioPage() {
                 <Fingerprint className="h-5 w-5" />
                 {biometricStatus === "processing" ? "Processando..." : "Registrar Ponto Biométrico"}
               </Button>
+              {user?.specificApplications?.some(app =>
+                app.name === "Biométrico Saúde" && app.type !== "Coordenador"
+              ) && (
+                  <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
+                    Registrar Ponto Manual
+                  </Button>
+                )}
 
-              <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
-                Registrar Ponto Manual
-              </Button>
             </div>
           </div>
         </CardContent>

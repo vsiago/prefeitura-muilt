@@ -89,7 +89,7 @@ export default function CalendarioPage() {
           console.log("Dados recebidos do endpoint:", registrosData)
 
           // Mapear os registros para o formato esperado pelo componente
-          const registrosMapeados = registrosData.map((registro) => ({
+          const registrosMapeados = registrosData.map((registro: { funcionario_matricula: any; funcionario_nome: any; unidade_nome: any; data: any; hora_entrada: any; hora_saida: any; horas_normais: any; hora_extra: any; hora_desconto: any; total_trabalhado: any }) => ({
             id: `${registro.funcionario_matricula}`,
             funcionario_id: `${registro.funcionario_matricula}`,
             funcionario_nome: registro.funcionario_nome,
@@ -99,6 +99,9 @@ export default function CalendarioPage() {
             data: registro.data || currentDate.toISOString().split("T")[0],
             hora_entrada: registro.hora_entrada,
             hora_saida: registro.hora_saida,
+            horas_normais: registro.horas_normais,         // <- se quiser usar separadamente
+            hora_extra: registro.hora_extra,
+            hora_desconto: registro.hora_desconto,
             status:
               registro.hora_entrada && registro.hora_saida
                 ? "Presente"

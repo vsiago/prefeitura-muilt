@@ -79,7 +79,7 @@ export default function Ferias() {
   }
 
   return (
-    <div className="container mx-auto py-6 p-8 mt-2">
+    <div className="mx-auto py-6 p-8 mt-2">
       <h2 className="text-2xl font-bold text-slate-600 mb-6">Solicitações de Férias</h2>
       <div className="bg-white rounded-lg p-8 shadow-sm">
         <div className="flex justify-between items-center mb-8">

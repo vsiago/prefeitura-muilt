@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSelector } from "react-redux";
+import { selectUser } from "../../../../../../redux/slices/authSlice";
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -63,7 +65,8 @@ export default function FuncionariosPage() {
   const [biometricStatus, setBiometricStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [activeTab, setActiveTab] = useState<string>("all")
   const [currentStep, setCurrentStep] = useState(1)
-  const [currentFuncionario, setCurrentFuncionario] = useState<Omit<Funcionario, "id">>({
+  const [currentFuncionario, setCurrentFuncionario] = useState<FuncionarioForm>({
+    id: undefined,
     nome: "",
     cargo: "",
     unidade_id: "",
@@ -75,6 +78,7 @@ export default function FuncionariosPage() {
     id_biometrico: "",
     tipo_escala: "8h",
   })
+  const user = useSelector(selectUser);
 
   const { toast } = useToast()
 
@@ -120,6 +124,7 @@ export default function FuncionariosPage() {
   const handleOpenDialog = (funcionario?: Funcionario) => {
     if (funcionario) {
       setCurrentFuncionario({
+        id: funcionario.id,
         nome: funcionario.nome,
         cargo: funcionario.cargo,
         unidade_id: funcionario.unidade_id,
@@ -179,7 +184,8 @@ export default function FuncionariosPage() {
 
       if (isEditMode) {
         // Atualizar funcionário existente diretamente na API
-        console.log("[ADD_FUNCIONARIO] Modo de edição - ID:", (currentFuncionario as Funcionario).id)
+        console.log("ID do funcionário a ser atualizado:", (currentFuncionario as Funcionario).id)
+
         const funcionarioAtualizado = await funcionarioAPI.update(
           (currentFuncionario as Funcionario).id,
           funcionarioPayload,
@@ -230,7 +236,7 @@ export default function FuncionariosPage() {
         cargo: "",
         unidade_id: unidade?.id || "",
         cpf: "",
-        data_admissao: new Date().toISOString().split("T")[0],
+        data_admissao: "",
         matricula: 0,
         email: "",
         telefone: "",
@@ -561,13 +567,19 @@ export default function FuncionariosPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <Button
-            onClick={() => handleOpenDialog()}
-            className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
-          >
-            <UserPlus className="mr-2 h-4 w-4" />
-            Novo Funcionário
-          </Button>
+
+
+          {user?.specificApplications?.some(app =>
+            app.name === "Biométrico Saúde" && app.type !== "Coordenador"
+          ) && (
+              <Button
+                onClick={() => handleOpenDialog()}
+                className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Novo Funcionário
+              </Button>
+            )}
 
           <div className="relative w-full sm:w-auto">
             <Input
@@ -595,7 +607,12 @@ export default function FuncionariosPage() {
                   <TableHead className="hidden md:table-cell">Data de Admissão</TableHead>
                   <TableHead className="hidden lg:table-cell">Email</TableHead>
                   <TableHead className="hidden lg:table-cell">Telefone</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  {user?.specificApplications?.some(app =>
+                    app.name === "Biométrico Saúde" && app.type !== "Coordenador"
+                  ) && (
+                      <TableHead className="text-right">Ações</TableHead>
+
+                    )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -612,24 +629,32 @@ export default function FuncionariosPage() {
                     <TableCell className="hidden lg:table-cell">{funcionario.email || "-"}</TableCell>
                     <TableCell className="hidden lg:table-cell">{funcionario.telefone || "-"}</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleOpenDialog(funcionario)}
-                        className="h-8 w-8 p-0 mr-1"
-                      >
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Editar</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleOpenDeleteDialog(funcionario.id)}
-                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Excluir</span>
-                      </Button>
+
+                      {user?.specificApplications?.some(app =>
+                        app.name === "Biométrico Saúde" && app.type !== "Coordenador"
+                      ) && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenDialog(funcionario)}
+                              className="h-8 w-8 p-0 mr-1"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              <span className="sr-only">Editar</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenDeleteDialog(funcionario.id)}
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Excluir</span>
+                            </Button>
+                          </>
+                        )}
+
                     </TableCell>
                   </TableRow>
                 ))}

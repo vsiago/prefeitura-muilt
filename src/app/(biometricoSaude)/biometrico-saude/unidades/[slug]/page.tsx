@@ -110,7 +110,7 @@ export default function UnidadePage() {
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold">Visão Geral</h2>
+        <h2 className="text-2xl font-bold text-slate-600">Visão Geral</h2>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>

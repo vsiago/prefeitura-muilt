@@ -85,7 +85,7 @@ export default function UnidadeLayout({
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Senha padrão: admin123
-    if (password === "admin123") {
+    if (password === "Admin@123") {
       setIsKioskMode(false)
       setIsPasswordModalOpen(false)
       setPassword("")

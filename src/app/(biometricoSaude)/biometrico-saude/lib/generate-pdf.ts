@@ -16,44 +16,44 @@ const getDayOfWeekAbbr = (date: Date): string => {
     return days[getDay(date)]
 }
 
-export const generateAttendanceReport = (funcionarioData: {
-    funcionario: {
-        nome: string
-        matricula: number
-        cargo: string
-        tipo_escala: string
-        unidade_nome: string
-        mes_ano: string
-    }
-    registros: Array<{
-        data: string
-        hora_entrada?: string
-        hora_saida?: string
-        total_trabalhado?: string
-        horas_normais?: string
-        horas_extras?: number
-        hora_extra?: string
-        justificativa?: string
-        hora_desconto?: string | number
-        total_trabalhado_mes?: {
-            hours: number
+export const generateAttendanceReport = (
+    funcionarioData: {
+        funcionario: {
+            nome: string
+            matricula: number
+            cargo: string
+            tipo_escala: string
+            unidade_nome: string
+            mes_ano: string
         }
-        total_hora_extra_mes?: {
-            hours: number
-        }
-        total_hora_desconto_mes?: {
-            hours: number
-        }
-    }>
-}): string => {
+        registros: Array<{
+            data: string
+            hora_entrada?: string
+            hora_saida?: string
+            total_trabalhado?: string
+            horas_normais?: string
+            horas_extras?: string
+            hora_extra?: string
+            justificativa?: string
+            hora_desconto?: string | number
+            total_trabalhado_mes?: {
+                hours: number
+            }
+            total_hora_extra_mes?: {
+                hours: number
+            }
+            total_hora_desconto_mes?: {
+                hours: number
+            }
+        }>
+    }): string => {
     // Create a new PDF document
     const doc = new jsPDF({
         orientation: "landscape",
         unit: "mm",
         format: "a4",
-    })
+    });
 
-    console.log("autoTable exists?", typeof doc.autoTable) // Deve retornar "function"
 
     // Definir margens mínimas - REDUCED
     const margin = 5
@@ -130,103 +130,208 @@ export const generateAttendanceReport = (funcionarioData: {
 
     // Criar um mapa dos registros existentes indexados por data
     const registrosPorData = new Map()
-    registros.forEach((registro) => {
-        // Converter a data do formato "DD/MM/YYYY" para um objeto Date
-        const [dia, mesReg, anoReg] = registro.data.split("/").map(Number)
-        const dataFormatada = format(new Date(anoReg, mesReg - 1, dia), "yyyy-MM-dd")
 
-        // IMPORTANT: Add default hora_desconto if it's missing
-        if (registro.hora_desconto === undefined) {
-            // Check specific dates that should have discount hours
-            if (registro.data === "23/03/2025") {
-                registro.hora_desconto = "03:00:00"
-            } else if (registro.data === "26/03/2025") {
-                registro.hora_desconto = "01:00:00"
-            } else {
-                registro.hora_desconto = "00:00:00"
+    const parseDateSafe = (dateStr: string): Date | null => {
+        if (!dateStr) return null;
+
+        try {
+            // Tenta parse no formato DD/MM/YYYY
+            if (dateStr.includes('/')) {
+                const [day, month, year] = dateStr.split('/').map(Number);
+                const date = new Date(year, month - 1, day);
+                return isNaN(date.getTime()) ? null : date;
             }
+
+            // Tenta parse como ISO string
+            const date = new Date(dateStr);
+            return isNaN(date.getTime()) ? null : date;
+        } catch {
+            return null;
         }
+    };
 
-        registrosPorData.set(dataFormatada, registro)
-    })
+    // Na função generateAttendanceReport, substitua a parte de processamento de registros por:
 
-    // Criar o corpo da tabela com todos os dias do mês
-    const attendanceBody = daysInMonth.map((day) => {
-        const dataFormatada = format(day, "yyyy-MM-dd")
-        const diaDaSemana = format(day, "EEEE", { locale: ptBR })
-        const registro = registrosPorData.get(dataFormatada)
+    // Substitua a parte de processamento dos registros por este código:
 
-        // Verificar se é final de semana
-        const isWeekend = getDay(day) === 0 || getDay(day) === 6
-        const rowStyles = isWeekend ? { fillColor: [240, 240, 250] } : {}
-
-        if (registro) {
-            // Determine the discount hours value
-            let descontoValue = "0"
-
-            if (registro.hora_desconto) {
-                // If it's a string like "03:00:00", use it directly
-                if (typeof registro.hora_desconto === "string") {
-                    if (registro.hora_desconto !== "00:00:00") {
-                        descontoValue = registro.hora_desconto
+    registros.forEach((registro) => {
+        // Processamento seguro da data
+        let dataFormatada = "1970-01-01"; // Data fallback
+        try {
+            if (registro.data && registro.data !== "Data inválida") {
+                // Tenta parse no formato DD/MM/YYYY
+                if (registro.data.includes('/')) {
+                    const [day, month, year] = registro.data.split('/').map(Number);
+                    const date = new Date(year, month - 1, day);
+                    if (!isNaN(date.getTime())) {
+                        dataFormatada = format(date, "yyyy-MM-dd");
                     }
                 }
-                // If it's a number, convert it to string
-                else if (typeof registro.hora_desconto === "number" && registro.hora_desconto > 0) {
-                    descontoValue = registro.hora_desconto.toString()
+                // Tenta parse como ISO string
+                else {
+                    const date = new Date(registro.data);
+                    if (!isNaN(date.getTime())) {
+                        dataFormatada = format(date, "yyyy-MM-dd");
+                    }
                 }
             }
+        } catch (error) {
+            console.error(`Erro ao processar data ${registro.data}:`, error);
+        }
 
-            // Special case for specific dates
-            const dayStr = format(day, "dd/MM/yyyy")
-            if (dayStr === "23/03/2025") {
-                descontoValue = "03:00:00"
-            } else if (dayStr === "26/03/2025") {
-                descontoValue = "01:00:00"
+        // Garantir valores padrão
+        registro.hora_desconto = registro.hora_desconto || "00:00:00";
+        registro.horas_extras = registro.horas_extras || "00:00:00";
+        registro.horas_normais = registro.horas_normais || "00:00:00";
+        registro.total_trabalhado = registro.total_trabalhado || "00:00:00";
+        registro.justificativa = registro.justificativa === "-" ? "" : registro.justificativa || "";
+
+        registrosPorData.set(dataFormatada, registro);
+    });
+
+
+
+
+    const attendanceBody = daysInMonth.map((day) => {
+        const dayStr = format(day, "dd/MM/yyyy");
+        const dataFormatada = format(day, "yyyy-MM-dd");
+        const diaDaSemana = format(day, "EEEE", { locale: ptBR });
+        const isWeekend = getDay(day) === 0 || getDay(day) === 6;
+        const rowStyles = isWeekend ? { fillColor: [240, 240, 250] } : {};
+
+        console.log(`\n\n--- Verificando o dia ${dayStr} ---`);
+        console.log(`Data formatada: ${dataFormatada}`);
+        console.log(`Dia da semana: ${diaDaSemana}`);
+        console.log(`É fim de semana: ${isWeekend ? 'Sim' : 'Não'}`);
+
+        // Buscando o registro correto para o dia
+        let registroFinal = registros.find(r => r.data === dataFormatada || r.data === dayStr);
+        console.log(`Registro encontrado pela data exata:`, registroFinal);
+
+        // Caso o registro não seja encontrado por data exata, busque por hora
+        if (!registroFinal) {
+            const dayOfMonth = day.getDate();
+            console.log(`Não encontrou por data exata, buscando pelo dia do mês...`);
+            registroFinal = registros.find(r => {
+                const regDate = parseDateSafe(r.data);
+                return regDate && regDate.getDate() === dayOfMonth;
+            });
+            console.log(`Registro encontrado pela data do mês:`, registroFinal);
+        }
+
+        // Se encontrar o registro, cria as células com os dados
+        if (registroFinal) {
+            console.log(`Registro final encontrado para o dia ${dayStr}:`, registroFinal);
+
+            const horasNormais = registroFinal.horas_normais ||
+                (registroFinal.hora_entrada && registroFinal.hora_saida ?
+                    calculateWorkedTime(registroFinal.hora_entrada, registroFinal.hora_saida) :
+                    "00:00:00");
+
+            console.log(`Horas Normais: ${horasNormais}`);
+
+            const horasExtras = registroFinal.horas_extras || registroFinal.hora_extra || "00:00:00";
+            const desconto = registroFinal.hora_desconto || "00:00:00";
+            const justificativa = registroFinal.justificativa === "-" ? "" : (registroFinal.justificativa || "");
+
+            console.log(`Horas Extras: ${horasExtras}`);
+            console.log(`Desconto: ${desconto}`);
+            console.log(`Justificativa: ${justificativa}`);
+
+            console.log("Registros: ", registros);
+            console.log(`Comparando por data exata: ${dataFormatada} e ${dayStr}`);
+
+            return [
+                { content: format(day, "dd/MM"), styles: { ...rowStyles, halign: "center" } },
+                { content: diaDaSemana, styles: { ...rowStyles, halign: "center" } },
+                {
+                    content: registroFinal.hora_entrada || "--",
+                    styles: {
+                        ...rowStyles,
+                        halign: "center",
+                        fontStyle: registroFinal.hora_entrada ? "bold" : "normal",
+                        textColor: registroFinal.hora_entrada ? [0, 0, 0] : [150, 150, 150]
+                    }
+                },
+                {
+                    content: registroFinal.hora_saida || "--",
+                    styles: {
+                        ...rowStyles,
+                        halign: "center",
+                        fontStyle: registroFinal.hora_saida ? "bold" : "normal",
+                        textColor: registroFinal.hora_saida ? [0, 0, 0] : [150, 150, 150]
+                    }
+                },
+                {
+                    content: horasNormais,
+                    styles: {
+                        ...rowStyles,
+                        halign: "center",
+                        fontStyle: "bold",
+                        textColor: [0, 0, 0]
+                    }
+                },
+                {
+                    content: horasExtras,
+                    styles: {
+                        ...rowStyles,
+                        halign: "center",
+                        textColor: horasExtras !== "00:00:00" ? [0, 0, 0] : [150, 150, 150]
+                    }
+                },
+                {
+                    content: desconto,
+                    styles: {
+                        ...rowStyles,
+                        halign: "center",
+                        textColor: desconto !== "00:00:00" ? [0, 0, 0] : [150, 150, 150]
+                    }
+                },
+                {
+                    content: justificativa,
+                    styles: { ...rowStyles, halign: "center" }
+                },
+
+            ];
+        } else {
+            console.log(`Nenhum registro encontrado para o dia ${dayStr}. Retornando linha em branco.`);
+            // Se não encontrar nenhum registro, retorna uma linha em branco
+            return [
+                { content: format(day, "dd/MM"), styles: { ...rowStyles, halign: "center" } },
+                { content: diaDaSemana, styles: { ...rowStyles, halign: "center" } },
+                { content: "--", styles: { ...rowStyles, halign: "center", textColor: [150, 150, 150] } },
+                { content: "--", styles: { ...rowStyles, halign: "center", textColor: [150, 150, 150] } },
+                { content: "00:00:00", styles: { ...rowStyles, halign: "center", textColor: [150, 150, 150] } },
+                { content: "00:00:00", styles: { ...rowStyles, halign: "center", textColor: [150, 150, 150] } },
+                { content: "00:00:00", styles: { ...rowStyles, halign: "center", textColor: [150, 150, 150] } },
+                { content: "", styles: { ...rowStyles, halign: "center" } },
+            ];
+        }
+    });
+
+
+    // Adicione esta função auxiliar para calcular horas trabalhadas
+    function calculateWorkedTime(entrada: string, saida: string): string {
+        if (!entrada || !saida) return "00:00:00";
+
+        try {
+            const [h1, m1] = entrada.split(':').map(Number);
+            const [h2, m2] = saida.split(':').map(Number);
+
+            let horas = h2 - h1;
+            let minutos = m2 - m1;
+
+            if (minutos < 0) {
+                horas--;
+                minutos += 60;
             }
 
-            return [
-                { content: format(day, "dd/MM"), styles: { ...rowStyles, halign: "center" } },
-                { content: diaDaSemana, styles: { ...rowStyles, halign: "center" } },
-                {
-                    content: registro.hora_entrada || "--",
-                    styles: { ...rowStyles, halign: "center", fontStyle: registro.hora_entrada ? "bold" : "normal" },
-                },
-                {
-                    content: registro.hora_saida || "--",
-                    styles: { ...rowStyles, halign: "center", fontStyle: registro.hora_saida ? "bold" : "normal" },
-                },
-                {
-                    content: registro.horas_normais ? registro.horas_normais.substring(0, 5) : "--",
-                    styles: { ...rowStyles, halign: "center", fontStyle: registro.horas_normais ? "bold" : "normal" },
-                },
-                {
-                    content: registro.hora_extra || registro.horas_extras || "0",
-                    styles: { ...rowStyles, halign: "center" },
-                },
-                {
-                    content: descontoValue,
-                    styles: { ...rowStyles, halign: "center" },
-                },
-                {
-                    content: registro.justificativa === "-" ? "" : registro.justificativa || "",
-                    styles: { ...rowStyles, halign: "center" },
-                },
-            ]
-        } else {
-            // Para dias sem registro, mostrar valores zerados e justificativa em branco
-            return [
-                { content: format(day, "dd/MM"), styles: { ...rowStyles, halign: "center" } },
-                { content: diaDaSemana, styles: { ...rowStyles, halign: "center" } },
-                { content: "--", styles: { ...rowStyles, halign: "center" } },
-                { content: "--", styles: { ...rowStyles, halign: "center" } },
-                { content: "00:00", styles: { ...rowStyles, halign: "center" } },
-                { content: "0", styles: { ...rowStyles, halign: "center" } },
-                { content: "0", styles: { ...rowStyles, halign: "center" } },
-                { content: "", styles: { ...rowStyles, halign: "center" } },
-            ]
+            return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:00`;
+        } catch {
+            return "00:00:00";
         }
-    })
+    }
+
 
     // Calcular o espaço disponível para a tabela principal - ADJUSTED START POSITION
     const tableStartY = 33
@@ -259,12 +364,12 @@ export const generateAttendanceReport = (funcionarioData: {
         body: attendanceBody,
         theme: "grid",
         styles: {
-            fontSize: 6, // REDUCED
-            cellPadding: 0.5, // REDUCED
+            fontSize: 6,
+            cellPadding: 0.5,
             minCellHeight: rowHeight,
             valign: "middle",
             lineColor: [220, 220, 220],
-            lineWidth: 0.1, // THINNER LINES
+            lineWidth: 0.1,
         },
         headStyles: {
             fillColor: primaryColor,
@@ -272,7 +377,7 @@ export const generateAttendanceReport = (funcionarioData: {
             lineWidth: 0.1,
             lineColor: [220, 220, 220],
             fontStyle: "bold",
-            fontSize: 7, // REDUCED
+            fontSize: 7,
         },
         bodyStyles: {
             lineWidth: 0.1,
@@ -281,25 +386,24 @@ export const generateAttendanceReport = (funcionarioData: {
         alternateRowStyles: {
             fillColor: [250, 250, 255],
         },
-        // Definir larguras específicas para as colunas
         columnStyles: {
-            0: { cellWidth: usableWidth * 0.07 }, // Data - REDUCED
-            1: { cellWidth: usableWidth * 0.08 }, // Dia
-            2: { cellWidth: usableWidth * 0.07 }, // Entrada - REDUCED
-            3: { cellWidth: usableWidth * 0.07 }, // Saída - REDUCED
-            4: { cellWidth: usableWidth * 0.08 }, // Horas Normais
-            5: { cellWidth: usableWidth * 0.07 }, // Horas Extras - REDUCED
-            6: { cellWidth: usableWidth * 0.07 }, // Desconto - REDUCED
-            7: { cellWidth: usableWidth * 0.39 }, // Justificativa - INCREASED
+            0: { cellWidth: usableWidth * 0.09 }, // Data
+            1: { cellWidth: usableWidth * 0.09 }, // Dia
+            2: { cellWidth: usableWidth * 0.09 }, // Entrada
+            3: { cellWidth: usableWidth * 0.09 }, // Saída
+            4: { cellWidth: usableWidth * 0.09 }, // Horas Normais
+            5: { cellWidth: usableWidth * 0.09 }, // Horas Extras
+            6: { cellWidth: usableWidth * 0.09 }, // Desconto
+            7: { cellWidth: usableWidth * 0.37 }, // Justificativa
         },
         margin: { left: margin, right: margin },
         didDrawPage: (data) => {
-            // This ensures we don't create a new page
             if (data.pageCount > 1) {
-                console.warn("PDF content exceeded one page!")
+                console.warn("PDF content exceeded one page!");
             }
         },
-    })
+    });
+
 
     // Obter os totais mensais da API
     let totalHorasMes = 0

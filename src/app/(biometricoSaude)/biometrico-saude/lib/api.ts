@@ -308,7 +308,7 @@ export const funcionarioAPI = {
 
       // Sempre buscar da API, sem verificar o localStorage primeiro
       console.log(`Buscando funcionários da unidade ${unidadeId} da API...`)
-      const response = await fetch(`${BASE_URL}/funci/unidade/${unidadeId}/funcionarios`)
+      const response = await fetch(`${BASE_URL}/funci/unidade/${unidadeId}/funcionarios?limit=1000&offset=0`)
 
       // Se a resposta não for ok, lance um erro com mais detalhes
       if (!response.ok) {
@@ -385,12 +385,18 @@ export const funcionarioAPI = {
   // Atualizar funcionário
   update: async (id: string, funcionario: Partial<Funcionario>): Promise<Funcionario | null> => {
     try {
-      // Garantir que todos os campos estejam incluídos
       const payload = {
-        ...funcionario,
+        nome: funcionario.nome,
+        cpf: funcionario.cpf || "",
+        cargo: funcionario.cargo,
+        unidade_id: funcionario.unidade_id,
+        data_admissao: funcionario.data_admissao || new Date().toISOString().split("T")[0],
+        id_biometrico: funcionario.id_biometrico || "",
+        matricula: funcionario.matricula || 0,
+        email: funcionario.email || "",
         telefone: funcionario.telefone || "",
         tipo_escala: funcionario.tipo_escala || "",
-      }
+      };
 
       console.log("[API] Atualizando funcionário:", id)
       console.log("[API] Payload completo:", JSON.stringify(payload, null, 2))
