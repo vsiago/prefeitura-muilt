@@ -336,7 +336,7 @@ export const funcionarioAPI = {
         cpf: funcionario.cpf || "",
         cargo: funcionario.cargo,
         unidade_id: funcionario.unidade_id,
-        data_admissao: funcionario.data_admissao || new Date().toISOString().split("T")[0],
+        data_admissao: funcionario.data_admissao || "Não tem data",
         id_biometrico: funcionario.id_biometrico || "",
         matricula: funcionario.matricula || 0,
         email: funcionario.email || "",
@@ -369,15 +369,6 @@ export const funcionarioAPI = {
     } catch (error) {
       console.error("[API] Erro ao criar funcionário:", error)
 
-      // For development environment, create a simulated employee
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[API] Usando funcionário simulado para desenvolvimento")
-        return {
-          ...funcionario,
-          id: `sim-${Date.now()}`,
-        } as Funcionario
-      }
-
       throw error // Propagate the error to be handled by the component
     }
   },
@@ -390,7 +381,7 @@ export const funcionarioAPI = {
         cpf: funcionario.cpf || "",
         cargo: funcionario.cargo,
         unidade_id: funcionario.unidade_id,
-        data_admissao: funcionario.data_admissao || new Date().toISOString().split("T")[0],
+        data_admissao: funcionario.data_admissao || "Não tem data",
         id_biometrico: funcionario.id_biometrico || "",
         matricula: funcionario.matricula || 0,
         email: funcionario.email || "",

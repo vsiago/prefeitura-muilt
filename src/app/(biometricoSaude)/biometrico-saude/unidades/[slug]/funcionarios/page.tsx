@@ -65,7 +65,7 @@ export default function FuncionariosPage() {
   const [biometricStatus, setBiometricStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [activeTab, setActiveTab] = useState<string>("all")
   const [currentStep, setCurrentStep] = useState(1)
-  const [currentFuncionario, setCurrentFuncionario] = useState<FuncionarioForm>({
+  const [currentFuncionario, setCurrentFuncionario] = useState<Funcionario>({
     id: undefined,
     nome: "",
     cargo: "",
@@ -143,7 +143,7 @@ export default function FuncionariosPage() {
         cargo: "",
         unidade_id: unidade?.id || "",
         cpf: "",
-        data_admissao: new Date().toISOString().split("T")[0],
+        data_admissao: "",
         matricula: 0,
         email: "",
         telefone: "",
@@ -163,6 +163,8 @@ export default function FuncionariosPage() {
   }
 
   const handleAddFuncionario = async () => {
+    console.log("Data de admissão enviada:", currentFuncionario.data_admissao)
+
     if (!currentFuncionario.nome || !currentFuncionario.cargo) {
       toast({
         title: "Erro",
@@ -330,6 +332,7 @@ export default function FuncionariosPage() {
         cpf: currentFuncionario.cpf,
         cargo: currentFuncionario.cargo,
         matricula: currentFuncionario.matricula?.toString() || "",
+        data_admissao: currentFuncionario.data_admissao,
         unidade_id: currentFuncionario.unidade_id,
         tipo_escala: currentFuncionario.tipo_escala || "8h",
         telefone: currentFuncionario.telefone || "",
@@ -611,7 +614,6 @@ export default function FuncionariosPage() {
                     app.name === "Biométrico Saúde" && app.type !== "Coordenador"
                   ) && (
                       <TableHead className="text-right">Ações</TableHead>
-
                     )}
                 </TableRow>
               </TableHeader>
@@ -622,9 +624,7 @@ export default function FuncionariosPage() {
                     <TableCell className="hidden sm:table-cell">{funcionario.matricula || "-"}</TableCell>
                     <TableCell>{funcionario.cargo}</TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {funcionario.data_admissao
-                        ? new Date(funcionario.data_admissao).toLocaleDateString("pt-BR")
-                        : "-"}
+                      {new Date(funcionario.data_admissao).toLocaleDateString('pt-BR')}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">{funcionario.email || "-"}</TableCell>
                     <TableCell className="hidden lg:table-cell">{funcionario.telefone || "-"}</TableCell>
@@ -1008,7 +1008,13 @@ export default function FuncionariosPage() {
               </Button>
             ) : (
               <Button
-                onClick={handleAddFuncionario}
+                onClick={() => {
+                  if (!isEditMode) {
+                    setIsDialogOpen(false);
+                  } else {
+                    handleAddFuncionario();
+                  }
+                }}
                 className="bg-green-500 hover:bg-green-600 text-white"
                 disabled={isSaving}
               >
