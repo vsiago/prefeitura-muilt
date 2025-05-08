@@ -23,7 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Check, AlertTriangle, Fingerprint } from "lucide-react"
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, addMonths, subMonths } from "date-fns"
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, addMonths, subMonths, addDays } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { generateAttendanceReport } from "@/lib/generate-pdf"
 
@@ -716,7 +716,7 @@ export default function CalendarioPage() {
                 {monthDays.map((day) => {
                   // Encontrar registros para este dia
                   const dayRegistros = registrosPonto.filter(
-                    (r) => r.data && r.data.split("T")[0] === format(day, "yyyy-MM-dd"),
+                    (r) => r.data && r.data.split("T")[0] === format(addDays(day, -1), "yyyy-MM-dd"),
                   )
 
                   // Determinar a cor de fundo com base nos registros
