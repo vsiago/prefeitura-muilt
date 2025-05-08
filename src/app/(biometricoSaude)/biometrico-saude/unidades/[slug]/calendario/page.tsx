@@ -1150,7 +1150,7 @@ export default function CalendarioPage() {
               <div className="py-4">
                 {(() => {
                   const dayRegistros = registrosPonto.filter(
-                    (r) => r.data && r.data.split("T")[0] === format(selectedDay, "yyyy-MM-dd"),
+                    (r) => r.data && r.data.split("T")[0] === format(addDays(selectedDay, -1), "yyyy-MM-dd"),
                   )
 
                   // Calcular paginação
