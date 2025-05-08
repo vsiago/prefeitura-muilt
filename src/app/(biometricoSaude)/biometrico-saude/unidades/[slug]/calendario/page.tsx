@@ -46,7 +46,7 @@ export default function CalendarioPage() {
   const [novoRegistro, setNovoRegistro] = useState<Omit<RegistroPonto, "id">>({
     funcionario_id: "",
     unidade_id: "",
-    data: new Date().toISOString().split("T")[0],
+    data: "",
     hora_entrada: "08:00",
     hora_saida: "17:00",
   })
@@ -298,15 +298,17 @@ export default function CalendarioPage() {
                 funcionario_nome: funcionarioNome,
                 unidade_id: unidade?.id || "",
                 unidade_nome: unidade?.nome || "",
-                data: currentDate.toISOString().split("T")[0],
+                data: data.registro_ponto.data,
                 hora_entrada: data.registro_ponto.hora_entrada,
                 hora_saida: data.registro_ponto.hora_saida,
                 id_biometrico: data.registro_ponto.id_biometrico,
                 status: "Presente",
               }
+              console.log("Novo Registro Ponto Manual: " + novoRegistro)
 
               setRegistrosPonto([...registrosPonto, novoRegistro])
             }
+
           }
         }
 
@@ -413,7 +415,7 @@ export default function CalendarioPage() {
         ...novoRegistro,
         funcionario_id: selectedFuncionario,
         unidade_id: unidade?.id || "",
-        data: currentDate.toISOString().split("T")[0],
+        data: novoRegistro.data,
       }
 
       const registroCriado = await registroPontoAPI.create(registro)
@@ -439,7 +441,7 @@ export default function CalendarioPage() {
         setNovoRegistro({
           funcionario_id: "",
           unidade_id: "",
-          data: new Date().toISOString().split("T")[0],
+          data: "",
           hora_entrada: "08:00",
           hora_saida: "17:00",
         })
@@ -992,12 +994,15 @@ export default function CalendarioPage() {
                   id="date"
                   type="date"
                   value={selectedDate ? selectedDate.split("T")[0] : ""}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={(e) => {
+                    const date = e.target.value
+                    setSelectedDate(date)
+                    setNovoRegistro({ ...novoRegistro, data: date })
+                  }}
                   className="pl-10"
                 />
               </div>
             </div>
-
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="hora_entrada" className="text-right">
@@ -1024,6 +1029,7 @@ export default function CalendarioPage() {
                 className="col-span-3"
               />
             </div>
+
           </div>
 
           <DialogFooter>
