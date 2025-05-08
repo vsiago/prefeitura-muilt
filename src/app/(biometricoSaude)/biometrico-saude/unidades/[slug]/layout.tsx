@@ -202,7 +202,7 @@ export default function UnidadeLayout({
                     <span>Calendário</span>
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     href={`/biometrico-saude/unidades/${slug}/ferias`}
                     className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${activeMenuItem === "ferias" ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
@@ -221,7 +221,7 @@ export default function UnidadeLayout({
                     <FileText size={18} />
                     <span>Relatórios</span>
                   </Link>
-                </li>
+                </li> */}
                 {canAccessSettings() && (
                   <li>
                     <Link

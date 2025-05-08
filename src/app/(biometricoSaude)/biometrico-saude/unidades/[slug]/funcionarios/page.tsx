@@ -624,7 +624,11 @@ export default function FuncionariosPage() {
                     <TableCell className="hidden sm:table-cell">{funcionario.matricula || "-"}</TableCell>
                     <TableCell>{funcionario.cargo}</TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {new Date(funcionario.data_admissao).toLocaleDateString('pt-BR')}
+                      {(() => {
+                        const date = new Date(funcionario.data_admissao);
+                        date.setDate(date.getDate() + 1); // Soma 1 dia
+                        return date.toLocaleDateString('pt-BR');
+                      })()}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">{funcionario.email || "-"}</TableCell>
                     <TableCell className="hidden lg:table-cell">{funcionario.telefone || "-"}</TableCell>

@@ -27,6 +27,10 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, a
 import { ptBR } from "date-fns/locale"
 import { generateAttendanceReport } from "@/lib/generate-pdf"
 
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+
 export default function CalendarioPage() {
   const params = useParams()
   const slug = params.slug as string
@@ -60,6 +64,7 @@ export default function CalendarioPage() {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const [selectedDate, setSelectedDate] = useState<string>("")
   const user = useSelector(selectUser);
 
   useEffect(() => {
@@ -977,6 +982,23 @@ export default function CalendarioPage() {
               </div>
             </div>
 
+            {/* Campo de seleção de dia */}
+            <div className="grid grid-cols-4 items-center gap-4 relative">
+              <Label htmlFor="date" className="text-right">
+                Dia
+              </Label>
+              <div className="col-span-3 relative">
+                <Input
+                  id="date"
+                  type="date"
+                  value={selectedDate ? selectedDate.split("T")[0] : ""}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="hora_entrada" className="text-right">
                 Hora de Entrada
@@ -986,7 +1008,7 @@ export default function CalendarioPage() {
                 type="time"
                 value={novoRegistro.hora_entrada}
                 onChange={(e) => setNovoRegistro({ ...novoRegistro, hora_entrada: e.target.value })}
-                className="col-span-3"
+                className="col-span-3 text-start"
               />
             </div>
 
